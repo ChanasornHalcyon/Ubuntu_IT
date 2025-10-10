@@ -8,22 +8,22 @@ const Index = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const login = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:4000/verifyUser", {
-        username,
-        password,
-      });
+const login = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await axios.post("/api/verifyUser", {
+      username,
+      password,
+    });
 
-      if (res.data.success) {
-        localStorage.setItem("username", res.data.user.username);
-        router.push("/Homepage");
-      }
-    } catch (err) {
-      setError("❌ Username หรือ Password ไม่ถูกต้อง");
+    if (res.data.success) {
+      localStorage.setItem("username", res.data.user.username);
+      router.push("/Homepage");
     }
-  };
+  } catch (err) {
+    setError("❌ Username หรือ Password ไม่ถูกต้อง");
+  }
+};
 
   return (
     <div className="container mx-auto max-w-[1920px] h-dvh bg-white">

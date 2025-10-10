@@ -39,12 +39,8 @@ app.post("/verifyUser/", async (req, res) => {
   }
 });
 
+const PORT = 4000;
 app.listen(PORT, async () => {
-  try {
-    await initMySQL();
-    console.log(`🚀 Server running on port ${PORT}`);
-  } catch (err) {
-    console.error("❌ Failed to start server:", err);
-    process.exit(1);
-  }
+  await initMySQL();
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
