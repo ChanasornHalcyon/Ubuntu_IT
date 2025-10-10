@@ -6,10 +6,22 @@ const Index = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const login = async (e) => {
-    router.push("./Homepage");
     e.preventDefault();
+    try {
+      const res = await axios.post("http://localhost:4000/verifyUser", {
+        username,
+        password,
+      });
+
+      if (res.data.success) {
+        router.push("/Homepage");
+      }
+    } catch (err) {
+      setError("❌ Username หรือ Password ไม่ถูกต้อง");
+    }
   };
 
   return (
@@ -30,8 +42,8 @@ const Index = () => {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none"
-                placeholder="Enter your username"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none text-black"
+                placeholder=" username"
               />
             </div>
 
@@ -47,9 +59,15 @@ const Index = () => {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none"
-                placeholder="Enter your password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none text-black"
+                placeholder=" password"
               />
+
+              {error && (
+                <div className="text-red-500 text-sm text-center mt-5">
+                  {error}
+                </div>
+              )}
             </div>
 
             <button

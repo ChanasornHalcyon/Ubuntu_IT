@@ -16,15 +16,22 @@ const initMySQL = async () => {
 app.use(express.json());
 app.use(cors());
 
-app.get("/user/", async (req, res) => {
-  
-  const results = await db.query("select * from user ");
-  if (results[0].length > 0) {
-    res.json(results[0]);
-  } else {
-    res.status(404).json({
-      message: "หาไม่เจอ",
-    });
+app.post("/verifyUser/", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM user WHERE username = ? AND password = ?",
+      [username, password]
+    );
+    if (rows.length > 0) {
+      res.json({ success: true, user: rows[0] });
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: "Username หรือ Password ไม่ถูกต้อง" });
+    }
+  } catch (err) {
+    console.error("❌ Database error:", err);
   }
 });
 
