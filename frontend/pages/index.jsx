@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Navbar from "./components/Navbar";
 import axios from "axios";
+
 const Index = () => {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const login = async (e) => {
     e.preventDefault();
     try {
@@ -17,6 +17,7 @@ const Index = () => {
       });
 
       if (res.data.success) {
+        localStorage.setItem("username", res.data.user.username);
         router.push("/Homepage");
       }
     } catch (err) {
