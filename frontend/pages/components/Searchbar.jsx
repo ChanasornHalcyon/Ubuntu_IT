@@ -2,10 +2,42 @@ import React from "react";
 import { CiSearch } from "react-icons/ci";
 import { useState } from "react";
 import ModalAddFile from "./ModalAddFile";
+import axios from "axios";
+
 const Searchbar = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const clickOpenModal = () => {
     setOpenModal((prev) => !prev);
+  };
+  const handleSubmit = async (formData) => {
+    setSubmitting(true);
+    
+    try {
+      const data = new FormData();
+      data.append("reason", formData.reason);
+      data.append("description", formData.description);
+      data.append("customer_part", formData.customerPart);
+      data.append("dwg_no", formData.dwgNo);
+      data.append("customer_name", formData.customerName);
+      if (formData.image) data.append("image", formData.image);
+
+      const res = await axios.post("http://localhost:4000/pushData", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (res.data.success) {
+        alert("✅ บันทึกข้อมูลสำเร็จ!");
+        setOpenModal(false);
+      } else {
+        alert("⚠️ ไม่สามารถบันทึกข้อมูลได้");
+      }
+    } catch (error) {
+      console.error("❌ Error submitting data:", error);
+      alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -30,8 +62,8 @@ const Searchbar = () => {
       {openModal && (
         <ModalAddFile
           onClose={() => setOpenModal(false)}
-          onSubmit={() => alert("Submit clicked")}
-          submitting={false}
+          onSubmit={handleSubmit}
+          submitting={submitting}
         />
       )}
     </div>

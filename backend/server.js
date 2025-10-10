@@ -1,27 +1,35 @@
-require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
-
+const multer = require("multer");
+const path = require("path");
 const app = express();
+
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const storage = multer.diskStorage({
+  destination: (req, file, res) => res(null, "uploads/"),
+  filename: (req, file, res) => {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    res(null, uniqueName);
+  },
+});
+const upload = multer({ storage });
 
 let db;
 const initMySQL = async () => {
   db = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: "localhost",
+    user: "root",
+    password: "khemnak1530",
+    database: "halcyon_internal",
   });
 };
+initMySQL();
 
-app.get("/", (req, res) => {
-  res.send("✅ API is running on Railway");
-});
-
-app.post("/verifyUser", async (req, res) => {
+app.post("/verifyUser/", async (req, res) => {
   const { username, password } = req.body;
   try {
     const [rows] = await db.query(
@@ -31,16 +39,42 @@ app.post("/verifyUser", async (req, res) => {
     if (rows.length > 0) {
       res.json({ success: true, user: rows[0] });
     } else {
-      res.status(400).json({ success: false, message: "Invalid credentials" });
+      res
+        .status(400)
+        .json({ success: false, message: "Username หรือ Password ไม่ถูกต้อง" });
     }
   } catch (err) {
-    console.error("Database error:", err);
-    res.status(500).json({ error: "Database error" });
+    console.error("❌ Database error:", err);
   }
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, async () => {
-  await initMySQL();
-  console.log(`🚀 Server running on port ${PORT}`);
+app.post("/pushData", upload.single("image"), async (req, res) => {
+  try {
+    const { reason, description, customer_part, dwg_no, customer_name } =
+      req.body;
+    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+    const sql = `
+      INSERT INTO file_records 
+      (reason, description, customer_part, dwg_no, customer_name, image_url)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    await db.query(sql, [
+      reason,
+      description,
+      customer_part,
+      dwg_no,
+      customer_name,
+      image_url,
+    ]);
+
+    res.json({ success: true, message: "Data inserted successfully" });
+  } catch (err) {
+    console.error("❌ Error:", err);
+    res.status(500).json({ success: false, message: "Database error" });
+  }
 });
+
+const PORT = 4000;
+app.listen(PORT, () =>
+  console.log(`🚀 Server running at http://localhost:${PORT}`)
+);

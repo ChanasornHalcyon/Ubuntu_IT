@@ -8,11 +8,19 @@ const ModalAddFile = ({ onClose, onSubmit, submitting }) => {
     customerPart: "",
     dwgNo: "",
     customerName: "",
+    image: null,
   });
+  const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, files } = e.target;
+    if (type === "file" && files.length > 0) {
+      const file = files[0];
+      setForm((prev) => ({ ...prev, [name]: file }));
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   return (
@@ -58,7 +66,7 @@ const ModalAddFile = ({ onClose, onSubmit, submitting }) => {
                 value={form.description}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#3698FC] text-black"
-              ></textarea>
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -100,6 +108,32 @@ const ModalAddFile = ({ onClose, onSubmit, submitting }) => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#3698FC] text-black"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Image
+              </label>
+              <input
+                type="file"
+                name="image"
+                accept="image/*"
+                onChange={handleChange}
+                className="w-full text-sm text-gray-600 border border-gray-300 rounded-md 
+                           file:mr-4 file:py-2 file:px-4 file:border-0 
+                           file:bg-[#3698FC] file:text-white file:rounded-md 
+                           hover:file:bg-blue-500 cursor-pointer"
+              />
+
+              {preview && (
+                <div className="mt-3 flex justify-center">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="w-20 h-20 object-cover rounded border"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
