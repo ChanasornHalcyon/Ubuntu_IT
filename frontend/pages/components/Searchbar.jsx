@@ -21,7 +21,7 @@ const Searchbar = ({ fetchDataNPTR, fetchDataNPTA }) => {
       data.append("customer_name", formData.customerName);
       if (formData.image) data.append("image", formData.image);
 
-      const res = await axios.post("https://halcyonone-internalz.onrender.com/pushData", data, {
+      const res = await axios.post("https://halcyonone-internal2-acse.onrender.com/pushData", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

@@ -11,7 +11,7 @@ const Index = () => {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("https://halcyonone-internalz.onrender.com/verifyUser", {
+      const res = await axios.post("https://halcyonone-internal2-acse.onrender.com/verifyUser", {
         username,
         password,
       });
