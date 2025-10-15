@@ -13,7 +13,7 @@ const Homepage = () => {
   return (
     <div className="container mx-auto max-w-[1920px] h-dvh bg-[#F8F8FF] relative">
       <Navbar />
-      <Searchbar/>
+      <Searchbar />
       <div className=" md:mt-14 py-10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 max-w-6xl mx-5 xl:mx-auto ">
           {card.map((item, index) => (

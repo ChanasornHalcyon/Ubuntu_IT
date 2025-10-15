@@ -69,59 +69,48 @@ const NPTR = () => {
             </thead>
 
             <tbody className="bg-[#F5F5F5]">
-              {dataNPTR.length > 0 ? (
-                dataNPTR.map((item, index) => (
-                  <tr key={index} className=" border  border-gray-900">
-                    <td className="px-4 py-3 text-center border-r border-gray-700">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 py-3 border-r border-gray-700">
-                      {item.reason}
-                    </td>
-                    <td className="px-4 py-3 border-r border-gray-700">
-                      {item.description}
-                    </td>
-                    <td className="px-4 py-3 border-r border-gray-700">
-                      {item.customer_part}
-                    </td>
-                    <td className="px-4 py-3 border-r border-gray-700">
-                      {item.dwg_no}
-                    </td>
-                    <td className="px-4 py-3 border-r border-gray-700">
-                      {item.customer_name}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center gap-2">
-                        {item.image_url ? (
-                          <button
-                            onClick={() => setPreviewImage(item.image_url)}
-                            className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded cursor-pointer"
-                          >
-                            View
-                          </button>
-                        ) : (
-                          "-"
-                        )}
+              {dataNPTR.map((item, index) => (
+                <tr key={index} className=" border  border-gray-900">
+                  <td className="px-4 py-3 text-center border-r border-gray-700">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
+                    {item.reason}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
+                    {item.description}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
+                    {item.customer_part}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
+                    {item.dwg_no}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
+                    {item.customer_name}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex justify-center gap-2">
+                      {item.image_url ? (
                         <button
-                          onClick={() => handleDelete(item.id)}
-                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded cursor-pointer"
+                          onClick={() => setPreviewImage(item.image_url)}
+                          className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded cursor-pointer"
                         >
-                          Delete
+                          View
                         </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    className="text-center px-4 py-6 text-gray-400 bg-gray-50 italic"
-                  >
-                    ไม่มีข้อมูล NPTR
+                      ) : (
+                        "-"
+                      )}
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded cursor-pointer"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>

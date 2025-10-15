@@ -83,15 +83,44 @@ app.get("/getNPTR", async (req, res) => {
     if (rows.length > 0) {
       res.json({ success: true, data: rows });
     } else {
-      res
-        .status(404)
-        .json({ success: false, message: "ไม่พบข้อมูลของลูกค้า NPTR" });
+      res.json({ success: false, message: "ไม่พบข้อมูลของลูกค้า NPTA" });
+    }
+  } catch (err) {
+    console.error("❌ Database error:", err);
+  }
+});
+app.get("/getNPTA", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM file_records WHERE customer_name = ?",
+      ["NPTA"]
+    );
+
+    if (rows.length > 0) {
+      res.json({ success: true, data: rows });
+    } else {
+      res.json({ success: false, message: "ไม่พบข้อมูลของลูกค้า NPTA" });
     }
   } catch (err) {
     console.error("❌ Database error:", err);
   }
 });
 
+app.get("/getNCOT", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM file_records WHERE customer_name = ?",
+      ["NCOT"]
+    );
+    if (rows.length > 0) {
+      res.json({ success: true, data: rows });
+    } else {
+      res.json({ success: false, message: "ไม่พบข้อมูลของลูกค้า NPTA" });
+    }
+  } catch (err) {
+    console.error("❌ Database error:", err);
+  }
+});
 app.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {

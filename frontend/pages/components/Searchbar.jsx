@@ -1,14 +1,12 @@
-"use client";
 import React, { useState } from "react";
 import { CiSearch } from "react-icons/ci";
 import { useRouter } from "next/router";
 import ModalAddFile from "./ModalAddFile";
 import axios from "axios";
 
-const Searchbar = ({ fetchDataNPTR }) => {
+const Searchbar = ({ fetchDataNPTR, fetchDataNPTA }) => {
   const router = useRouter();
   const isHomepage = router.pathname === "/Homepage";
-
   const [openModal, setOpenModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -30,7 +28,8 @@ const Searchbar = ({ fetchDataNPTR }) => {
       if (res.data.success) {
         alert("✅ บันทึกข้อมูลสำเร็จ!");
         setOpenModal(false);
-        fetchDataNPTR();
+        fetchDataNPTR?.();
+        fetchDataNPTA?.();
       } else {
         alert("⚠️ ไม่สามารถบันทึกข้อมูลได้");
       }
@@ -43,8 +42,8 @@ const Searchbar = ({ fetchDataNPTR }) => {
 
   return (
     <div className="flex items-center w-full px-5 mt-10 relative">
-      <div className="flex md:justify-center w-full">
-        <div className="relative w-[250px] md:w-96">
+      <div className="flex justify-center w-full">
+        <div className="relative w-[20px] px-2 md:w-96">
           <input
             className="w-full px-4 py-3 pr-10 border border-gray-800 rounded-md text-gray-600 
                        focus:outline-none focus:border-[#FF3399]"
