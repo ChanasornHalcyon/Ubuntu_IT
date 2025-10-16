@@ -11,14 +11,17 @@ const Index = () => {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("https://halcyonone-internalz.onrender.com/verifyUser", {
-        username,
-        password,
-      });
+      const res = await axios.post(
+        "https://halcyonone-internal.onrender.com/verifyUser",
+        {
+          username,
+          password,
+        }
+      );
 
       if (res.data.success) {
         localStorage.setItem("username", res.data.user.username);
-        router.push("/Homepage");
+        router.push("/homepage");
       }
     } catch (err) {
       setError("❌ Username หรือ Password ไม่ถูกต้อง");
