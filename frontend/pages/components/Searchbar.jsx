@@ -43,7 +43,7 @@ const Searchbar = ({ fetchDataNPTR, fetchDataNPTA }) => {
   return (
     <div className="flex items-center w-full px-5 mt-10 relative">
       <div className="flex justify-center w-full">
-        <div className="relative w-[20px] px-2 md:w-96">
+        <div className="relative w-[210px] px-2 md:w-[400px]">
           <input
             className="w-full px-4 py-3 pr-10 border border-gray-800 rounded-md text-gray-600 
                        focus:outline-none focus:border-[#FF3399]"

@@ -23,9 +23,9 @@ const Navbar = () => {
     <nav className="bg-[#0B4EA2] p-5 flex justify-between items-center relative">
       <img
         onClick={goHomePage}
-        className="w-24 cursor-pointer"
-        src="iims.PNG"
-        alt="iims "
+        className="w-14 cursor-pointer ml-4 filter brightness-0 invert"
+        src="HT Logo.PNG"
+        alt="HT"
       />
 
       {isIndexPage ? (

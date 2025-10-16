@@ -43,6 +43,7 @@ const NPTA = () => {
     <div className="container mx-auto max-w-[1920px] h-dvh bg-[#F8F8FF] relative">
       <Navbar />
       <Searchbar fetchDataNPTA={fetchDataNPTA} />
+
       <div className="w-full mt-10 px-5">
         <h2 className="text-2xl font-semibold mb-6 text-[#0B4EA2] text-center">
           Customer: NPTA
@@ -64,13 +65,16 @@ const NPTA = () => {
                 <th className="px-4 py-3 border-r border-gray-900">
                   Customer Name
                 </th>
+                <th className="px-4 py-3 border-r border-gray-900 text-center">
+                  Image
+                </th>
                 <th className="px-4 py-3 text-center">Action</th>
               </tr>
             </thead>
 
             <tbody className="bg-[#F5F5F5]">
               {dataNPTA.map((item, index) => (
-                <tr key={index} className=" border  border-gray-900">
+                <tr key={index} className="border border-gray-900">
                   <td className="px-4 py-3 text-center border-r border-gray-700">
                     {index + 1}
                   </td>
@@ -89,25 +93,29 @@ const NPTA = () => {
                   <td className="px-4 py-3 border-r border-gray-700">
                     {item.customer_name}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-center gap-2">
-                      {item.image_url ? (
-                        <button
+
+                  <td className="px-4 py-3 border-r border-gray-700 text-center">
+                    {item.image_url ? (
+                      <div className="flex justify-center items-center">
+                        <img
+                          src={`http://localhost:4000${item.image_url}`}
+                          alt="Preview"
+                          className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
                           onClick={() => setPreviewImage(item.image_url)}
-                          className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded cursor-pointer"
-                        >
-                          View
-                        </button>
-                      ) : (
-                        "-"
-                      )}
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                        />
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-md font-medium rounded cursor-pointer"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -119,37 +127,33 @@ const NPTA = () => {
       {previewImage && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 flex justify-center items-start mt-10"
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50 flex justify-center items-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
           >
-            <div className="bg-white rounded-2xl shadow-xl w-[350px] sm:w-[400px] md:w-[500px] relative">
-              <div className="flex justify-between items-center p-4 border-b">
-                <h5 className="text-2xl font-semibold text-black">Image</h5>
+            <div className="bg-[#F8F8FF] rounded-2xl shadow-2xl p-3 relative max-w-[90%] max-h-[90%] flex flex-col items-center">
+              <div className="w-full flex justify-end mb-2">
                 <button
                   onClick={() => setPreviewImage(null)}
-                  className="text-gray-500 hover:text-gray-700 text-xl cursor-pointer"
+                  className="text-gray-600 hover:text-red-500 text-3xl font-bold cursor-pointer mr-3"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="p-5 flex justify-center items-center">
-                <img
-                  src={`http://localhost:4000${previewImage}`}
-                  alt="Preview"
-                  className="max-h-[400px] w-auto object-contain rounded border"
-                />
-              </div>
+              <img
+                src={`http://localhost:4000${previewImage}`}
+                alt="Full Preview"
+                className="w-full h-auto max-h-[80vh] object-contain rounded-md"
+              />
             </div>
           </motion.div>
 
           <motion.div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-60 z-40"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
+            animate={{ opacity: 0.6 }}
             exit={{ opacity: 0 }}
             onClick={() => setPreviewImage(null)}
           />
