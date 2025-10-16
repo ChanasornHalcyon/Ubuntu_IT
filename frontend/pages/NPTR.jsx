@@ -10,7 +10,7 @@ const NPTR = () => {
 
   const fetchDataNPTR = async () => {
     try {
-      const res = await axios.get("https://halcyonone-internal-test.onrender.com/getNPTR");
+      const res = await axios.get("http://localhost:4000/getNPTR");
       if (res.data.success) {
         setDataNPTR(res.data.data);
       } else {
@@ -24,7 +24,7 @@ const NPTR = () => {
   const handleDelete = async (id) => {
     if (!confirm("ยืนยันการลบข้อมูลนี้ใช่หรือไม่?")) return;
     try {
-      const res = await axios.delete(`https://halcyonone-internal-test.onrender.com/delete${id}`);
+      const res = await axios.delete(`http://localhost:4000/delete/${id}`);
       if (res.data.success) {
         setDataNPTR((prev) => prev.filter((item) => item.id !== id));
       } else {
