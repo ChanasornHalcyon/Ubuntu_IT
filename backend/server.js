@@ -1,51 +1,48 @@
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2/promise");
+const { Pool } = require("pg");
 const multer = require("multer");
 const path = require("path");
-const app = express();
 require("dotenv").config();
+
+const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const storage = multer.diskStorage({
-  destination: (req, file, res) => res(null, "uploads/"),
-  filename: (req, file, res) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    res(null, uniqueName);
-  },
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
 
-let db;
-const initMySQL = async () => {
-  db = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: process.env.DB_PORT || 3306,
-  });
-};
-initMySQL();
+// ✅ เชื่อม PostgreSQL บน Render
+const db = new Pool({
+  host: process.env.DB_HOST, // = dpg-xxxxx
+  port: process.env.DB_PORT, // = 5432
+  user: process.env.DB_USER, // = root
+  password: process.env.DB_PASS, // = ***
+  database: process.env.DB_NAME, // = halcyon_internal_avdd
+  ssl: { rejectUnauthorized: false }, // 🛡️ สำหรับ Render
+});
 
-app.post("/verifyUser/", async (req, res) => {
+app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
   try {
-    const [rows] = await db.query(
-      "SELECT * FROM user WHERE username = ? AND password = ?",
+    const result = await db.query(
+      "SELECT * FROM users WHERE username = $1 AND password = $2",
       [username, password]
     );
-    if (rows.length > 0) {
-      res.json({ success: true, user: rows[0] });
+    if (result.rows.length > 0) {
+      res.json({ success: true, user: result.rows[0] });
     } else {
       res
         .status(400)
-        .json({ success: false, message: "Username หรือ Password ไม่ถูกต้อง" });
+        .json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
     }
   } catch (err) {
-    console.error("❌ Database error:", err);
+    console.error("❌ verifyUser Error:", err);
+    res.status(500).json({ success: false });
   }
 });
 
@@ -54,10 +51,11 @@ app.post("/pushData", upload.single("image"), async (req, res) => {
     const { reason, description, customer_part, dwg_no, customer_name } =
       req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
     const sql = `
       INSERT INTO file_records 
       (reason, description, customer_part, dwg_no, customer_name, image_url)
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4, $5, $6)
     `;
     await db.query(sql, [
       reason,
@@ -70,24 +68,25 @@ app.post("/pushData", upload.single("image"), async (req, res) => {
 
     res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
-    console.error("❌ Error:", err);
+    console.error("❌ pushData Error:", err);
+    res.status(500).json({ success: false });
   }
 });
 
 const getByCustomer = (customer) => async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT * FROM file_records WHERE customer_name = ?",
+    const result = await db.query(
+      "SELECT * FROM file_records WHERE customer_name = $1",
       [customer]
     );
-
-    if (rows.length > 0) {
-      res.json({ success: true, data: rows });
+    if (result.rows.length > 0) {
+      res.json({ success: true, data: result.rows });
     } else {
       res.json({ success: false, message: `ไม่พบข้อมูลของลูกค้า ${customer}` });
     }
   } catch (err) {
-    console.error("❌ Database error:", err);
+    console.error("❌ getByCustomer Error:", err);
+    res.status(500).json({ success: false });
   }
 };
 
@@ -98,15 +97,13 @@ app.get("/getNCOT", getByCustomer("NCOT"));
 app.delete("/delete/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    await db.query("DELETE FROM file_records WHERE id = ?", [id]);
+    await db.query("DELETE FROM file_records WHERE id = $1", [id]);
     res.json({ success: true });
   } catch (err) {
     console.error("❌ Delete error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false });
   }
 });
 
-const PORT = 4000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
