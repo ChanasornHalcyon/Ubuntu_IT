@@ -4,7 +4,8 @@ const mysql = require("mysql2/promise");
 const multer = require("multer");
 const path = require("path");
 const app = express();
-
+const dotenv = require("dotenv");
+dotenv.config();
 app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -21,10 +22,11 @@ const upload = multer({ storage });
 let db;
 const initMySQL = async () => {
   db = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "khemnak1530",
-    database: "halcyon_internal",
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
   });
 };
 initMySQL();
