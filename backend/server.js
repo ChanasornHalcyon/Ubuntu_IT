@@ -88,7 +88,7 @@ const getByCustomer = (customer) => async (req, res) => {
       res.json({ success: false, message: `ไม่พบข้อมูลของลูกค้า ${customer}` });
     }
   } catch (err) {
-    console.error("❌ getByCustomer Error:", err);
+    console.error(" getByCustomer Error:", err);
     res.status(500).json({ success: false });
   }
 };

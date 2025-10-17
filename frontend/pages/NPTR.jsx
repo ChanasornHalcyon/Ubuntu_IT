@@ -10,7 +10,9 @@ const NPTR = () => {
 
   const fetchDataNPTR = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/getNPTR");
+      const res = await axios.get(
+        "https://halcyonone-internal.onrender.com/getNPTR"
+      );
       if (res.data.success) {
         setDataNPTR(res.data.data);
       } else {

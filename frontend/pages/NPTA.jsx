@@ -10,7 +10,9 @@ const NPTA = () => {
 
   const fetchDataNPTA = async () => {
     try {
-      const res = await axios.get("https://halcyonone-internal.onrender.com/getNPTA");
+      const res = await axios.get(
+        "https://halcyonone-internal.onrender.com/getNPTA"
+      );
       if (res.data.success) {
         setDataNPTA(res.data.data);
       } else {
@@ -24,7 +26,9 @@ const NPTA = () => {
   const handleDelete = async (id) => {
     if (!confirm("ยืนยันการลบข้อมูลนี้ใช่หรือไม่?")) return;
     try {
-      const res = await axios.delete(`https://halcyonone-internal.onrender.com/delete/${id}`);
+      const res = await axios.delete(
+        `https://halcyonone-internal.onrender.com/delete/${id}`
+      );
       if (res.data.success) {
         setDataNPTA((prev) => prev.filter((item) => item.id !== id));
       } else {
