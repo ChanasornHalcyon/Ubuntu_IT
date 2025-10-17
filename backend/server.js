@@ -6,13 +6,13 @@ const path = require("path");
 require("dotenv").config();
 
 const app = express();
+
 app.use(
   cors({
     origin: ["https://halcyonone-internal.vercel.app"],
     credentials: true,
   })
 );
-
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -56,7 +56,6 @@ app.post("/pushData", upload.single("image"), async (req, res) => {
     const { reason, description, customer_part, dwg_no, customer_name } =
       req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-
     const sql = `
       INSERT INTO file_records 
       (reason, description, customer_part, dwg_no, customer_name, image_url)
@@ -70,7 +69,6 @@ app.post("/pushData", upload.single("image"), async (req, res) => {
       customer_name,
       image_url,
     ]);
-
     res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
     console.error("❌ pushData Error:", err);
@@ -100,9 +98,8 @@ app.get("/getNPTA", getByCustomer("NPTA"));
 app.get("/getNCOT", getByCustomer("NCOT"));
 
 app.delete("/delete/:id", async (req, res) => {
-  const { id } = req.params;
   try {
-    await db.query("DELETE FROM file_records WHERE id = $1", [id]);
+    await db.query("DELETE FROM file_records WHERE id = $1", [req.params.id]);
     res.json({ success: true });
   } catch (err) {
     console.error("❌ Delete error:", err);
@@ -111,4 +108,6 @@ app.delete("/delete/:id", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
