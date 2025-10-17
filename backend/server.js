@@ -6,7 +6,13 @@ const path = require("path");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://halcyonone-internal.vercel.app"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -16,14 +22,13 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ✅ เชื่อม PostgreSQL บน Render
 const db = new Pool({
-  host: process.env.DB_HOST, // = dpg-xxxxx
-  port: process.env.DB_PORT, // = 5432
-  user: process.env.DB_USER, // = root
-  password: process.env.DB_PASS, // = ***
-  database: process.env.DB_NAME, // = halcyon_internal_avdd
-  ssl: { rejectUnauthorized: false }, // 🛡️ สำหรับ Render
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  ssl: { rejectUnauthorized: false },
 });
 
 app.post("/verifyUser", async (req, res) => {
