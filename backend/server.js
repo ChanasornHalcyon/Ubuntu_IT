@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["https://halcyonone-internal.vercel.app"],
+    origin: ["https://halcyon-one-internal.vercel.app"],
     credentials: true,
   })
 );
