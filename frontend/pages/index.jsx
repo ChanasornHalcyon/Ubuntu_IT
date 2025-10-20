@@ -9,7 +9,23 @@ const Index = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  
+  const login = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        "https://halcyonone-internal.onrender.com/verifyUser",
+        { username, password },
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        localStorage.setItem("username", res.data.user.username);
+        router.push("/homepage");
+      }
+    } catch (err) {
+      console.error("❌ Login Error:", err);
+      setError("Username หรือ Password ไม่ถูกต้อง");
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-[1920px] h-dvh bg-white">
