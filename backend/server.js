@@ -20,7 +20,14 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "application/pdf"];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Only images or PDFs are allowed!"));
+  },
+});
 
 const db = new Pool({
   host: process.env.DB_HOST,
@@ -53,17 +60,24 @@ app.post("/verifyUser", async (req, res) => {
 
 app.post("/pushData", upload.single("image"), async (req, res) => {
   try {
-    const { reason, description, customer_part, dwg_no, customer_name } =
-      req.body;
+    const {
+      reason,
+      description,
+      material,
+      customer_part,
+      dwg_no,
+      customer_name,
+    } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
     const sql = `
       INSERT INTO file_records 
-      (reason, description, customer_part, dwg_no, customer_name, image_url)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (reason, description,material, customer_part, dwg_no, customer_name, image_url)
+      VALUES ($1, $2, $3, $4, $5, $6,$7)
     `;
     await db.query(sql, [
       reason,
       description,
+      material,
       customer_part,
       dwg_no,
       customer_name,
@@ -71,7 +85,7 @@ app.post("/pushData", upload.single("image"), async (req, res) => {
     ]);
     res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
-    console.error("❌ pushData Error:", err);
+    console.error(" pushData Error:", err);
     res.status(500).json({ success: false });
   }
 });
@@ -102,7 +116,7 @@ app.delete("/delete/:id", async (req, res) => {
     await db.query("DELETE FROM file_records WHERE id = $1", [req.params.id]);
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Delete error:", err);
+    console.error(" Delete error:", err);
     res.status(500).json({ success: false });
   }
 });

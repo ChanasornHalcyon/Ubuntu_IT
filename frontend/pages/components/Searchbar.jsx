@@ -16,6 +16,7 @@ const Searchbar = ({ fetchDataNPTR, fetchDataNPTA }) => {
       const data = new FormData();
       data.append("reason", formData.reason);
       data.append("description", formData.description);
+      data.append("material", formData.material);
       data.append("customer_part", formData.customerPart);
       data.append("dwg_no", formData.dwgNo);
       data.append("customer_name", formData.customerName);

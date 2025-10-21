@@ -10,28 +10,32 @@ const MAHLE = () => {
 
   const fetchDataMAHLE = async () => {
     try {
-      const res = await axios.get("https://halcyonone-internal.onrender.com/getMAHLE");
+      const res = await axios.get(
+        "https://halcyonone-internal.onrender.com/getMAHLE"
+      );
       if (res.data.success) {
         setDataMAHLE(res.data.data);
       } else {
-        console.warn("⚠️ ไม่พบข้อมูล MAHLE");
+        console.warn(" ไม่พบข้อมูล MAHLE");
       }
     } catch (err) {
-      console.error("❌ Error fetching data:", err);
+      console.error(" Error fetching data:", err);
     }
   };
 
   const handleDelete = async (id) => {
     if (!confirm("ยืนยันการลบข้อมูลนี้ใช่หรือไม่?")) return;
     try {
-      const res = await axios.delete(`https://halcyonone-internal.onrender.com/delete/${id}`);
+      const res = await axios.delete(
+        `https://halcyonone-internal.onrender.com/delete/${id}`
+      );
       if (res.data.success) {
         setDataMAHLE((prev) => prev.filter((item) => item.id !== id));
       } else {
         alert("เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     } catch (err) {
-      console.error("❌ Delete error:", err);
+      console.error("Delete error:", err);
     }
   };
 
@@ -58,6 +62,7 @@ const MAHLE = () => {
                 <th className="px-4 py-3 border-r border-gray-900">
                   Description
                 </th>
+                <th className="px-4 py-3 border-r border-gray-900">Material</th>
                 <th className="px-4 py-3 border-r border-gray-900">
                   Customer Part
                 </th>
@@ -85,6 +90,9 @@ const MAHLE = () => {
                     {item.description}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
+                    {item.material}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
                     {item.customer_part}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
@@ -96,14 +104,25 @@ const MAHLE = () => {
 
                   <td className="px-4 py-3 border-r border-gray-700 text-center">
                     {item.image_url ? (
-                      <div className="flex justify-center items-center">
-                        <img
-                          src={`https://halcyonone-internal.onrender.com${item.image_url}`}
-                          alt="Preview"
-                          className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setPreviewImage(item.image_url)}
-                        />
-                      </div>
+                      item.image_url.toLowerCase().endsWith(".pdf") ? (
+                        <a
+                          href={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600  hover:text-blue-800"
+                        >
+                          View PDF
+                        </a>
+                      ) : (
+                        <div className="flex justify-center items-center">
+                          <img
+                            src={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                            alt="Preview"
+                            className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setPreviewImage(item.image_url)}
+                          />
+                        </div>
+                      )
                     ) : (
                       "-"
                     )}
@@ -112,7 +131,7 @@ const MAHLE = () => {
                   <td className="px-4 py-3 text-center">
                     <button
                       onClick={() => handleDelete(item.id)}
-                      className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded cursor-pointer"
+                      className="px-3 py-2 bg-red-500 hover:bg-red-600 text-white text-md font-medium rounded cursor-pointer"
                     >
                       Delete
                     </button>
@@ -132,15 +151,18 @@ const MAHLE = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="bg-white rounded-2xl shadow-2xl p-4 relative max-w-[90%] max-h-[90%]">
-              <button
-                onClick={() => setPreviewImage(null)}
-                className="absolute top-2 right-3 text-gray-600 hover:text-red-500 text-2xl font-bold cursor-pointer"
-              >
-                ✕
-              </button>
+            <div className="bg-[#F8F8FF] rounded-2xl shadow-2xl p-3 relative max-w-[90%] max-h-[90%] flex flex-col items-center">
+              <div className="w-full flex justify-end mb-2">
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="text-gray-600 hover:text-red-500 text-2xl font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
               <img
-                src={`http://localhost:4000${previewImage}`}
+                src={`hhttps://halcyonone-internal.onrender.com${previewImage}`}
                 alt="Full Preview"
                 className="w-full h-auto max-h-[80vh] object-contain rounded-md"
               />

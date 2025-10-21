@@ -5,6 +5,7 @@ const ModalAddFile = ({ onClose, onSubmit, submitting }) => {
   const [form, setForm] = useState({
     reason: "",
     description: "",
+    material: "",
     customerPart: "",
     dwgNo: "",
     customerName: "",
@@ -61,14 +62,24 @@ const ModalAddFile = ({ onClose, onSubmit, submitting }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
-              <textarea
+              <input
                 name="description"
                 value={form.description}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#3698FC] text-black"
               />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Material
+              </label>
+              <input
+                name="material"
+                value={form.material}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[#3698FC] text-black"
+              />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

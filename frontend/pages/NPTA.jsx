@@ -16,10 +16,10 @@ const NPTA = () => {
       if (res.data.success) {
         setDataNPTA(res.data.data);
       } else {
-        console.warn("⚠️ ไม่พบข้อมูล NPTA");
+        console.warn(" ไม่พบข้อมูล NPTA");
       }
     } catch (err) {
-      console.error("❌ Error fetching data:", err);
+      console.error(" Error fetching data:", err);
     }
   };
 
@@ -62,6 +62,7 @@ const NPTA = () => {
                 <th className="px-4 py-3 border-r border-gray-900">
                   Description
                 </th>
+                <th className="px-4 py-3 border-r border-gray-900">Material</th>
                 <th className="px-4 py-3 border-r border-gray-900">
                   Customer Part
                 </th>
@@ -89,6 +90,9 @@ const NPTA = () => {
                     {item.description}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
+                    {item.material}
+                  </td>
+                  <td className="px-4 py-3 border-r border-gray-700">
                     {item.customer_part}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
@@ -100,14 +104,25 @@ const NPTA = () => {
 
                   <td className="px-4 py-3 border-r border-gray-700 text-center">
                     {item.image_url ? (
-                      <div className="flex justify-center items-center">
-                        <img
-                          src={`https://halcyonone-internal.onrender.com${item.image_url}`}
-                          alt="Preview"
-                          className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setPreviewImage(item.image_url)}
-                        />
-                      </div>
+                      item.image_url.toLowerCase().endsWith(".pdf") ? (
+                        <a
+                          href={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600  hover:text-blue-800"
+                        >
+                          View PDF
+                        </a>
+                      ) : (
+                        <div className="flex justify-center items-center">
+                          <img
+                            src={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                            alt="Preview"
+                            className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setPreviewImage(item.image_url)}
+                          />
+                        </div>
+                      )
                     ) : (
                       "-"
                     )}
@@ -140,14 +155,14 @@ const NPTA = () => {
               <div className="w-full flex justify-end mb-2">
                 <button
                   onClick={() => setPreviewImage(null)}
-                  className="text-gray-600 hover:text-red-500 text-3xl font-bold cursor-pointer mr-3"
+                  className="text-gray-600 hover:text-red-500 text-2xl font-bold cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
               <img
-                src={`https://halcyonone-internal.onrender.com${previewImage}`}
+                src={`hhttps://halcyonone-internal.onrender.com${previewImage}`}
                 alt="Full Preview"
                 className="w-full h-auto max-h-[80vh] object-contain rounded-md"
               />
