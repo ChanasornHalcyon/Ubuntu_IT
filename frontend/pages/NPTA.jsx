@@ -16,10 +16,10 @@ const NPTA = () => {
       if (res.data.success) {
         setDataNPTA(res.data.data);
       } else {
-        console.warn(" ไม่พบข้อมูล NPTA");
+        console.warn("⚠️ ไม่พบข้อมูล NPTA");
       }
     } catch (err) {
-      console.error(" Error fetching data:", err);
+      console.error("❌ Error fetching data:", err);
     }
   };
 
@@ -35,7 +35,7 @@ const NPTA = () => {
         alert("เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error("❌ Delete error:", err);
     }
   };
 
@@ -62,7 +62,6 @@ const NPTA = () => {
                 <th className="px-4 py-3 border-r border-gray-900">
                   Description
                 </th>
-                <th className="px-4 py-3 border-r border-gray-900">Material</th>
                 <th className="px-4 py-3 border-r border-gray-900">
                   Customer Part
                 </th>
@@ -90,9 +89,6 @@ const NPTA = () => {
                     {item.description}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
-                    {item.material}
-                  </td>
-                  <td className="px-4 py-3 border-r border-gray-700">
                     {item.customer_part}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
@@ -102,7 +98,7 @@ const NPTA = () => {
                     {item.customer_name}
                   </td>
 
-                  <td className="px-4 py-3 border-r border-gray-700 text-center">
+                    <td className="px-4 py-3 border-r border-gray-700 text-center">
                     {item.image_url ? (
                       item.image_url.toLowerCase().endsWith(".pdf") ? (
                         <a
@@ -162,7 +158,7 @@ const NPTA = () => {
               </div>
 
               <img
-                src={`hhttps://halcyonone-internal.onrender.com${previewImage}`}
+                src={`https://halcyonone-internal.onrender.com${previewImage}`}
                 alt="Full Preview"
                 className="w-full h-auto max-h-[80vh] object-contain rounded-md"
               />

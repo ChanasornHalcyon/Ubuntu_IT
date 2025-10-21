@@ -98,16 +98,27 @@ const NPTR = () => {
                     {item.customer_name}
                   </td>
 
-                  <td className="px-4 py-3 border-r border-gray-700 text-center">
+                    <td className="px-4 py-3 border-r border-gray-700 text-center">
                     {item.image_url ? (
-                      <div className="flex justify-center items-center">
-                        <img
-                          src={`https://halcyonone-internal.onrender.com${item.image_url}`}
-                          alt="Preview"
-                          className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
-                          onClick={() => setPreviewImage(item.image_url)}
-                        />
-                      </div>
+                      item.image_url.toLowerCase().endsWith(".pdf") ? (
+                        <a
+                          href={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600  hover:text-blue-800"
+                        >
+                          View PDF
+                        </a>
+                      ) : (
+                        <div className="flex justify-center items-center">
+                          <img
+                            src={`https://halcyonone-internal.onrender.com${item.image_url}`}
+                            alt="Preview"
+                            className="w-16 h-16 object-cover rounded-md border cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setPreviewImage(item.image_url)}
+                          />
+                        </div>
+                      )
                     ) : (
                       "-"
                     )}

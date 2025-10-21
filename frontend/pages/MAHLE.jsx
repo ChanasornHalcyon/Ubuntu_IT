@@ -16,10 +16,10 @@ const MAHLE = () => {
       if (res.data.success) {
         setDataMAHLE(res.data.data);
       } else {
-        console.warn(" ไม่พบข้อมูล MAHLE");
+        console.warn("⚠️ ไม่พบข้อมูล MAHLE");
       }
     } catch (err) {
-      console.error(" Error fetching data:", err);
+      console.error("❌ Error fetching data:", err);
     }
   };
 
@@ -35,7 +35,7 @@ const MAHLE = () => {
         alert("เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error("❌ Delete error:", err);
     }
   };
 
@@ -62,7 +62,6 @@ const MAHLE = () => {
                 <th className="px-4 py-3 border-r border-gray-900">
                   Description
                 </th>
-                <th className="px-4 py-3 border-r border-gray-900">Material</th>
                 <th className="px-4 py-3 border-r border-gray-900">
                   Customer Part
                 </th>
@@ -88,9 +87,6 @@ const MAHLE = () => {
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
                     {item.description}
-                  </td>
-                  <td className="px-4 py-3 border-r border-gray-700">
-                    {item.material}
                   </td>
                   <td className="px-4 py-3 border-r border-gray-700">
                     {item.customer_part}
@@ -162,7 +158,7 @@ const MAHLE = () => {
               </div>
 
               <img
-                src={`hhttps://halcyonone-internal.onrender.com${previewImage}`}
+                src={`https://halcyonone-internal.onrender.com${previewImage}`}
                 alt="Full Preview"
                 className="w-full h-auto max-h-[80vh] object-contain rounded-md"
               />

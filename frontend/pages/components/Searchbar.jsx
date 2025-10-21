@@ -20,7 +20,7 @@ const Searchbar = ({ fetchDataNPTR, fetchDataNPTA }) => {
       data.append("customer_part", formData.customerPart);
       data.append("dwg_no", formData.dwgNo);
       data.append("customer_name", formData.customerName);
- if (formData.file) data.append("file", formData.file);
+      if (formData.file) data.append("file", formData.file);
 
       const res = await axios.post(
         "https://halcyonone-internal.onrender.com/pushData",
