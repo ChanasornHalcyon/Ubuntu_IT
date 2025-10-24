@@ -56,8 +56,7 @@ const Add_Drawing = () => {
         return;
       }
 
-      const res = await axios.post(
-        "https://halcyonone-internal.onrender.com/pushData",
+      const res = await axios.post(`https://halcyonone-internal.onrender.com/pushData`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
