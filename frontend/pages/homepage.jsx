@@ -1,7 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
 import Navbar from "./components/Navbar";
-import Searchbar from "./components/Searchbar";
 import { motion } from "framer-motion";
 const Homepage = () => {
   const router = useRouter();
