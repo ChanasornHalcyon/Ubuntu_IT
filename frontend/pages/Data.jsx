@@ -72,15 +72,13 @@ const Data = () => {
 
                     <td className="px-4 py-2 border text-center">
                       {item.file_url ? (
-       <a
+   <a
   href={`https://halcyonone-internal.onrender.com/preview/file/${item.file_url.split('/').pop()}`}
   target="_blank"
   rel="noopener noreferrer"
-  title="View PDF"
-  className="inline-flex items-center justify-center hover:scale-110 transition-transform"
 >
   <FaFilePdf className="text-red-600 text-2xl" />
-</a>               ) : (
+</a>        ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </td>

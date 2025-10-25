@@ -4,6 +4,7 @@ const { Pool } = require("pg");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
+const axios = require("axios");
 require("dotenv").config();
 
 const app = express();
@@ -135,28 +136,25 @@ app.get("/getAllData", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
-
 app.get("/preview/file/:filename", async (req, res) => {
+  const filename = req.params.filename;
+
+  const cloudName = "duex9zity";
+
+  const fileUrl = `https://res.cloudinary.com/${cloudName}/raw/upload/${filename}`;
+
   try {
-    const result = await db.query(
-      "SELECT file_url FROM drawing_records WHERE file_url LIKE $1",
-      [`%${req.params.filename}`]
-    );
-    const rows = result.rows;
-
-    if (!rows.length) return res.status(404).send("File not found");
-
-    const fileUrl = rows[0].file_url;
-    const fileRes = await axios.get(fileUrl, { responseType: "stream" });
+    const response = await axios.get(fileUrl, { responseType: "stream" });
 
     res.setHeader("Content-Type", "application/pdf");
-    fileRes.data.pipe(res);
-  } catch (error) {
-    console.error("Proxy preview error:", error);
-    res.status(500).send("Internal Server Error");
+    res.setHeader("Content-Disposition", "inline; filename=" + filename);
+
+    response.data.pipe(res);
+  } catch (err) {
+    console.error("Cloudinary proxy error:", err.message);
+    res.status(500).send("Cannot load PDF");
   }
 });
-
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
