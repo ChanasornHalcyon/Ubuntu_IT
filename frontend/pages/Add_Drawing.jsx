@@ -48,7 +48,9 @@ const Add_Drawing = () => {
       Object.entries(form).forEach(([key, value]) => {
         formData.append(key, value);
       });
+
       const userId = localStorage.getItem("userId");
+      
       if (userId) {
         formData.append("employee_drawing", userId);
       } else {
@@ -57,7 +59,7 @@ const Add_Drawing = () => {
       }
 
       const res = await axios.post(
-        `https://halcyonone-internal.onrender.com/pushData`,
+        "https://halcyonone-internal.onrender.com/pushData",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
