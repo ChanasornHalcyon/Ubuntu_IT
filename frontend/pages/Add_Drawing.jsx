@@ -44,7 +44,7 @@ const Add_Drawing = () => {
     try {
       const formData = new FormData();
 
-      formData.append("customerName", form.customerName);
+      formData.append("customer_name", form.customerName);
       formData.append("date", form.date);
       formData.append("drawing_no", form.drawingNo);
       formData.append("rev", form.rev);
