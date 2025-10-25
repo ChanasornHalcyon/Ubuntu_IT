@@ -65,41 +65,47 @@ app.post("/verifyUser", async (req, res) => {
 app.post("/pushData", upload.single("file"), async (req, res) => {
   try {
     const {
-      customer_name,
+      customerName,
       date,
-      drawing_no,
+      drawingNo,
       rev,
-      customer_part_no,
+      customerPart,
       description,
-      material_main,
-      material_sub,
-      pcd_grade,
+      materialMain,
+      materialSub,
+      pcdGrade,
     } = req.body;
+
     const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+
     const sql = `
-     INSERT INTO drawing_records 
-     (customer_name, date, drawing_no, rev, customer_part_no, description,
-     material_main, material_sub, pcd_grade, file_url)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      INSERT INTO drawing_records 
+      (customer_name, date, drawing_no, rev, customer_part_no, description,
+       material_main, material_sub, pcd_grade, file_url)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     `;
+
     await db.query(sql, [
-      customer_name,
+      customerName,
       date,
-      drawing_no,
+      drawingNo,
       rev,
-      customer_part_no,
+      customerPart,
       description,
-      material_main,
-      material_sub,
-      pcd_grade,
+      materialMain,
+      materialSub,
+      pcdGrade,
       file_url,
     ]);
-    res.json({ success: true, message: "Data inserted successfully" });
+
+    res.json({ success: true, message: "✅ Data inserted successfully" });
   } catch (err) {
-    console.error(" pushData Error:", err);
-    res.status(500).json({ success: false });
+    console.error("❌ pushData Error:", err);
+    res.status(500).json({ success: false, message: err.message });
   }
 });
+
+
 
 app.get("/getAllData", async (req, res) => {
   try {
