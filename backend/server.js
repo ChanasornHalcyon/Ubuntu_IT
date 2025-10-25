@@ -14,16 +14,20 @@ app.use(
   })
 );
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+const uploadDir = path.join(__dirname, "uploads");
+
+app.use("/uploads", express.static(uploadDir));
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname); 
-    const safeName = Date.now() + ext; 
+    const ext = path.extname(file.originalname);
+    const safeName = Date.now() + ext;
     cb(null, safeName);
   },
 });
+
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
