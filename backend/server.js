@@ -69,20 +69,45 @@ app.post("/verifyUser", async (req, res) => {
 
 app.post("/pushData", upload.single("file"), async (req, res) => {
   try {
+    console.log(" req.body:", req.body);
+    console.log("req.file:", req.file);
+
     const {
       employee_drawing,
       customer_name,
       date,
       drawing_no,
       rev,
-      customer_part_no,   
+      customer_part_no,
       description,
       material_main,
       material_sub,
       pcd_grade,
     } = req.body;
 
+    const empId = parseInt(employee_drawing, 10);
+    if (isNaN(empId)) {
+      console.error("❌ Invalid employee_drawing:", employee_drawing);
+      return res
+        .status(400)
+        .json({ success: false, message: "employee_drawing must be a number" });
+    }
+
     const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+    console.log("🧩 Data to insert:", {
+      empId,
+      customer_name,
+      date,
+      drawing_no,
+      rev,
+      customer_part_no,
+      description,
+      material_main,
+      material_sub,
+      pcd_grade,
+      file_url,
+    });
 
     await db.query(
       `INSERT INTO drawing_records 
@@ -90,12 +115,12 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
         description, material_main, material_sub, pcd_grade, file_url)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
       [
-        employee_drawing,
+        empId,
         customer_name,
         date,
         drawing_no,
         rev,
-        customer_part_no,  
+        customer_part_no,
         description,
         material_main,
         material_sub,
@@ -104,13 +129,17 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       ]
     );
 
+    console.log("✅ Insert success!");
     res.json({ success: true, message: "Drawing added successfully!" });
   } catch (err) {
-    console.error(" pushData Error:", err.stack || err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ pushData Error message:", err.message);
+    console.error("❌ pushData Error stack:", err.stack);
+    res.status(500).json({
+      success: false,
+      message: `Server Error: ${err.message}`,
+    });
   }
 });
-
 
 app.get("/getAllData", async (req, res) => {
   try {
