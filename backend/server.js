@@ -3,6 +3,7 @@ const cors = require("cors");
 const { Pool } = require("pg");
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
@@ -15,10 +16,13 @@ app.use(
 );
 app.use(express.json());
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+app.use("/uploads", express.static(uploadDir));
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({
@@ -41,13 +45,11 @@ const db = new Pool({
 
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
-
   try {
     const result = await db.query(
       "SELECT id, username, password FROM users WHERE username = $1 AND password = $2",
       [username, password]
     );
-
     if (result.rows.length > 0) {
       res.json({ success: true, user: result.rows[0] });
     } else {
@@ -56,12 +58,12 @@ app.post("/verifyUser", async (req, res) => {
         .json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
     }
   } catch (err) {
-    console.error(" verifyUser Error:", err);
     res
       .status(500)
       .json({ success: false, message: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์" });
   }
 });
+
 app.post("/pushData", upload.single("file"), async (req, res) => {
   try {
     const {
@@ -77,6 +79,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
     } = req.body;
 
     const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+    const dateValue = date ? date.split("T")[0] : null;
 
     const sql = `
       INSERT INTO drawing_records 
@@ -87,7 +90,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
 
     await db.query(sql, [
       customerName,
-      date,
+      dateValue,
       drawingNo,
       rev,
       customerPart,
@@ -98,14 +101,11 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       file_url,
     ]);
 
-    res.json({ success: true, message: "✅ Data inserted successfully" });
+    res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
-    console.error("❌ pushData Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-
 
 app.get("/getAllData", async (req, res) => {
   try {
@@ -114,17 +114,17 @@ app.get("/getAllData", async (req, res) => {
     );
     res.json({ success: true, data: result.rows });
   } catch (err) {
-    console.error(" getAllData Error:", err);
     res.status(500).json({ success: false });
   }
 });
 
 app.delete("/delete/:id", async (req, res) => {
   try {
-    await db.query("DELETE FROM file_records WHERE id = $1", [req.params.id]);
+    await db.query("DELETE FROM drawing_records WHERE id = $1", [
+      req.params.id,
+    ]);
     res.json({ success: true });
   } catch (err) {
-    console.error(" Delete error:", err);
     res.status(500).json({ success: false });
   }
 });
