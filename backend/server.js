@@ -25,6 +25,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
+
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
@@ -118,16 +119,7 @@ app.get("/getAllData", async (req, res) => {
   }
 });
 
-app.delete("/delete/:id", async (req, res) => {
-  try {
-    await db.query("DELETE FROM drawing_records WHERE id = $1", [
-      req.params.id,
-    ]);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
-});
+
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
