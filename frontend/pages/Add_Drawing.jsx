@@ -50,7 +50,6 @@ const Add_Drawing = () => {
       });
 
       const userId = localStorage.getItem("userId");
-      
       if (userId) {
         formData.append("employee_drawing", userId);
       } else {
