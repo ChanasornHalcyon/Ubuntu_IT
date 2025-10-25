@@ -73,7 +73,7 @@ const Data = () => {
                     <td className="px-4 py-2 border text-center">
                       {item.file_url ? (
                         <a
-                          href={`https://halcyonone-internal.onrender.com${item.file_url}`}
+                          href={item.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center hover:scale-110 transition-transform"
