@@ -44,17 +44,24 @@ const Add_Drawing = () => {
 
     try {
       const formData = new FormData();
-
-      Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
       const userId = localStorage.getItem("userId");
-      if (userId) {
-        formData.append("employee_drawing", userId);
-      } else {
-        alert(" ไม่พบข้อมูลผู้ใช้ในระบบ กรุณา login ใหม่");
+
+      if (!userId) {
+        alert("ไม่พบข้อมูลผู้ใช้ในระบบ กรุณา login ใหม่");
         return;
       }
+
+      formData.append("employee_drawing", userId);
+      formData.append("customer_name", form.customerName);
+      formData.append("date", form.date);
+      formData.append("drawing_no", form.drawingNo);
+      formData.append("rev", form.rev);
+      formData.append("customer_part_no", form.customerPart);
+      formData.append("description", form.description);
+      formData.append("material_main", form.materialMain);
+      formData.append("material_sub", form.materialSub);
+      formData.append("pcd_grade", form.pcdGrade);
+      formData.append("file", form.file);
 
       const res = await axios.post(
         "https://halcyonone-internal.onrender.com/pushData",
@@ -84,7 +91,7 @@ const Add_Drawing = () => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert(" Server Error!");
+      alert("Server Error!");
     }
   };
 

@@ -9,7 +9,11 @@ const app = express();
 
 app.use(
   cors({
-    origin: ["https://halcyon-one-internal.vercel.app"],
+    origin: [
+      "https://halcyon-one-internal.vercel.app",
+      "https://halcyonone-internal.onrender.com",
+      "http://localhost:3000",
+    ],
     credentials: true,
   })
 );
@@ -65,31 +69,18 @@ app.post("/verifyUser", async (req, res) => {
 
 app.post("/pushData", upload.single("file"), async (req, res) => {
   try {
-    console.log("req.body:", req.body);
-    console.log("req.file:", req.file);
-
     const {
       employee_drawing,
-      customerName,
+      customer_name,
       date,
-      drawingNo,
+      drawing_no,
       rev,
-      customerPart,
+      customer_part_no,   
       description,
-      materialMain,
-      materialSub,
-      pcdGrade,
+      material_main,
+      material_sub,
+      pcd_grade,
     } = req.body;
-
-    if (!employee_drawing || !customerName || !date) {
-      console.error("Missing fields:", { employee_drawing, customerName, date });
-      return res.status(400).json({ success: false, message: "Missing required fields" });
-    }
-
-    const empId = parseInt(employee_drawing, 10);
-    if (isNaN(empId)) {
-      throw new Error(`employee_drawing is not a number: ${employee_drawing}`);
-    }
 
     const file_url = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -98,7 +89,19 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
        (employee_drawing, customer_name, date, drawing_no, rev, customer_part_no,
         description, material_main, material_sub, pcd_grade, file_url)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-      [empId, customerName, date, drawingNo, rev, customerPart, description, materialMain, materialSub, pcdGrade, file_url]
+      [
+        employee_drawing,
+        customer_name,
+        date,
+        drawing_no,
+        rev,
+        customer_part_no,  
+        description,
+        material_main,
+        material_sub,
+        pcd_grade,
+        file_url,
+      ]
     );
 
     res.json({ success: true, message: "Drawing added successfully!" });
