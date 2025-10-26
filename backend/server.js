@@ -51,8 +51,6 @@ app.post("/verifyUser", async (req, res) => {
 
 app.post("/pushData", async (req, res) => {
   try {
-    console.log(" BODY RECEIVED:", req.body);
-
     const {
       customerName,
       date,
@@ -66,21 +64,10 @@ app.post("/pushData", async (req, res) => {
       fileBase64,
     } = req.body;
 
-    if (!fileBase64) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Missing fileBase64" });
-    }
-
-    const buffer = Buffer.from(fileBase64, "base64");
-    const fileName = `${Date.now()}-drawing.pdf`;
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, buffer);
-
     const sql = `
       INSERT INTO drawing_records
       (customer_name, date, drawing_no, rev, customer_part_no, description,
-       material_main, material_sub, pcd_grade, file_url)
+       material_main, material_sub, pcd_grade, file_base64)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     `;
     await db.query(sql, [
@@ -93,7 +80,7 @@ app.post("/pushData", async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
-      `/uploads/${fileName}`,
+      fileBase64,
     ]);
 
     res.json({ success: true });
