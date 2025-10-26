@@ -53,7 +53,7 @@ app.post("/verifyUser", async (req, res) => {
   }
 });
 
-app.post("/pushData", upload.single("file"), async (req, res) => {
+app.post("/pushData", async (req, res) => {
   try {
     const {
       customerName,
@@ -65,18 +65,31 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
+      fileBase64,
     } = req.body;
 
-    const file_base64 = req.file ? req.file.buffer.toString("base64") : null;
+    let file_url = null;
+    if (fileBase64) {
+      const uploadDir = path.join(__dirname, "uploads");
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    const dateValue = date ? date.split("T")[0] : null;
+      const fileName = `${Date.now()}-drawing.pdf`;
+      const filePath = path.join(uploadDir, fileName);
+
+      const buffer = Buffer.from(fileBase64, "base64");
+      fs.writeFileSync(filePath, buffer);
+
+      file_url = `/uploads/${fileName}`;
+    }
 
     const sql = `
       INSERT INTO drawing_records 
       (customer_name, date, drawing_no, rev, customer_part_no, description,
-       material_main, material_sub, pcd_grade, file_base64)
+       material_main, material_sub, pcd_grade, file_url)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     `;
+
+    const dateValue = date ? date.split("T")[0] : null;
 
     await db.query(sql, [
       customerName,
@@ -88,11 +101,12 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
-      file_base64,
+      file_url,
     ]);
 
     res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
+    console.error("pushData Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
