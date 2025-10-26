@@ -118,6 +118,66 @@ app.get("/getAllData", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+app.post("/searchDrawing", async (req, res) => {
+  try {
+    const {
+      customerName,
+      date,
+      drawingNo,
+      customerPart,
+      description,
+      materialMain,
+      pcdGrade,
+    } = req.body;
+
+    let sql = "SELECT * FROM drawing_records WHERE 1=1";
+    const params = [];
+    let paramIndex = 1; 
+
+    if (customerName) {
+      sql += ` AND customer_name ILIKE $${paramIndex++}`;
+      params.push(`%${customerName}%`);
+    }
+
+    if (date) {
+      sql += ` AND DATE(date) = $${paramIndex++}`;
+      params.push(date);
+    }
+
+    if (drawingNo) {
+      sql += ` AND drawing_no ILIKE $${paramIndex++}`;
+      params.push(`%${drawingNo}%`);
+    }
+
+    if (customerPart) {
+      sql += ` AND customer_part_no ILIKE $${paramIndex++}`;
+      params.push(`%${customerPart}%`);
+    }
+
+    if (description) {
+      sql += ` AND description ILIKE $${paramIndex++}`;
+      params.push(`%${description}%`);
+    }
+
+    if (materialMain) {
+      sql += ` AND material_main ILIKE $${paramIndex++}`;
+      params.push(`%${materialMain}%`);
+    }
+
+    if (pcdGrade) {
+      sql += ` AND pcd_grade ILIKE $${paramIndex++}`;
+      params.push(`%${pcdGrade}%`);
+    }
+
+    sql += " ORDER BY id ASC";
+
+    const result = await db.query(sql, params);
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error("searchDrawing Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

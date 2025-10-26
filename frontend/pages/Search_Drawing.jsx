@@ -20,9 +20,37 @@ const Search_Drawing = () => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Searching...");
+    if (
+      !form.customerName &&
+      !form.date &&
+      !form.drawingNo &&
+      !form.customerPart &&
+      !form.description &&
+      !form.materialMain &&
+      !form.pcdGrade
+    ) {
+      localStorage.removeItem("searchResults");
+      router.push("/Data");
+      return;
+    }
+    try {
+      console.log("Form before submit:", form);
+      const res = await axios.post(
+        "https://halcyonone-internal.onrender.com/searchDrawing",
+        form
+      );
+      if (res.data.success) {
+        localStorage.setItem("searchResults", JSON.stringify(res.data.data));
+        router.push("/Data");
+      } else {
+        alert("ไม่พบข้อมูลตามเงื่อนไข");
+      }
+    } catch (err) {
+      console.error("Search Error:", err);
+      alert("เกิดข้อผิดพลาดในการค้นหา");
+    }
   };
 
   return (

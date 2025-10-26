@@ -34,7 +34,12 @@ const Data = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const stored = localStorage.getItem("searchResults");
+    if (stored) {
+      setData(JSON.parse(stored));
+    } else {
+      fetchData();
+    }
   }, []);
 
   return (
