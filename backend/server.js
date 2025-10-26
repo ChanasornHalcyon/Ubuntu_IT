@@ -6,6 +6,7 @@ const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
+
 app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({
@@ -13,7 +14,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json({ limit: "10mb" }));
+
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 app.use("/uploads", express.static(uploadDir));
@@ -50,6 +51,8 @@ app.post("/verifyUser", async (req, res) => {
 
 app.post("/pushData", async (req, res) => {
   try {
+    console.log(" BODY RECEIVED:", req.body);
+
     const {
       customerName,
       date,
@@ -62,6 +65,12 @@ app.post("/pushData", async (req, res) => {
       pcdGrade,
       fileBase64,
     } = req.body;
+
+    if (!fileBase64) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing fileBase64" });
+    }
 
     const buffer = Buffer.from(fileBase64, "base64");
     const fileName = `${Date.now()}-drawing.pdf`;
@@ -106,6 +115,4 @@ app.get("/getAllData", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
