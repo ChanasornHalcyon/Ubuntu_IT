@@ -14,7 +14,7 @@ const Add_Drawing = () => {
     materialMain: "",
     materialSub: "",
     pcdGrade: "",
-    file: "",
+    file: null,
   });
 
   const [preview, setPreview] = useState(null);
@@ -25,17 +25,15 @@ const Add_Drawing = () => {
 
     if (files && files.length > 0) {
       const file = files[0];
-      const reader = new FileReader();
+      setForm({ ...form, file });
 
-      reader.onloadend = () => {
-        setForm({ ...form, file: reader.result }); // เก็บ base64
-        const isImage = file.type.startsWith("image/");
-        const isPDF = file.type === "application/pdf";
-        setFileType(isImage ? "image" : isPDF ? "pdf" : "other");
-        setPreview(reader.result);
-      };
+      const isImage = file?.type?.startsWith("image/");
+      const isPDF = file?.type === "application/pdf";
 
-      reader.readAsDataURL(file);
+      setFileType(isImage ? "image" : isPDF ? "pdf" : "other");
+      setPreview(
+        isImage ? URL.createObjectURL(file) : isPDF ? file.name : null
+      );
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -45,18 +43,25 @@ const Add_Drawing = () => {
     e.preventDefault();
 
     try {
+      const formData = new FormData();
+
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
       const userId = localStorage.getItem("userId");
-      if (!userId) {
-        alert("ไม่พบข้อมูลผู้ใช้ในระบบ กรุณา login ใหม่");
+      if (userId) {
+        formData.append("employee_drawing", userId);
+      } else {
+        alert(" ไม่พบข้อมูลผู้ใช้ในระบบ กรุณา login ใหม่");
         return;
       }
 
-      const payload = { ...form, employee_drawing: userId };
-
       const res = await axios.post(
         "https://halcyonone-internal.onrender.com/pushData",
-        payload,
-        { headers: { "Content-Type": "application/json" } }
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
 
       if (res.data.success) {
@@ -71,7 +76,7 @@ const Add_Drawing = () => {
           materialMain: "",
           materialSub: "",
           pcdGrade: "",
-          file: "",
+          file: null,
         });
         setPreview(null);
       } else {
@@ -79,14 +84,13 @@ const Add_Drawing = () => {
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Server Error!");
+      alert(" Server Error!");
     }
   };
 
   return (
     <div className="container mx-auto max-w-[1920px] min-h-screen bg-[#F8F8FF]">
       <Navbar />
-
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-7xl mx-auto mt-5 px-8 md:px-52 xl:px-40 rounded-xl"
@@ -190,7 +194,6 @@ const Add_Drawing = () => {
                   <option value="DCMT070204">DCMT070204</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Sub Material
@@ -239,7 +242,7 @@ const Add_Drawing = () => {
                     <div className="flex flex-col items-center justify-center text-red-500">
                       <FaFilePdf size={40} />
                       <p className="text-[#1C70D3] text-base font-semibold mt-3">
-                        PDF File
+                        {preview}
                       </p>
                     </div>
                   ) : (
@@ -258,7 +261,6 @@ const Add_Drawing = () => {
                 className="hidden"
                 id="fileInput"
               />
-
               <label
                 htmlFor="fileInput"
                 className="px-5 py-2 bg-[#1C70D3] text-white rounded-full cursor-pointer hover:bg-[#0A4EA3] transition"
@@ -282,4 +284,44 @@ const Add_Drawing = () => {
   );
 };
 
-export default Add_Drawing;
+export default Add_Drawing;       <div className="flex items-center justify-center w-full xl:ml-20">
+          <div className="flex flex-col items-center justify-center w-full max-w-[500px] h-80 border-2 border-dashed border-gray-400 bg-[#FAFAFA] rounded-md p-6 relative">
+            {preview && (
+              <div className="mb-4 text-center">
+                {fileType === "image" ? (
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="w-60 h-40 object-contain mx-auto rounded-md"
+                  />
+                ) : fileType === "pdf" ? (
+                  <div className="flex flex-col items-center justify-center text-red-500">
+                    <FaFilePdf size={40} />
+                    <p className="text-[#1C70D3] text-base font-semibold mt-3">
+                      PDF File
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">Unsupported file type</p>
+                )}
+              </div>
+            )}
+
+            <input
+              type="file"
+              name="file"
+              onChange={handleChange}
+              accept="image/*,application/pdf"
+              className="hidden"
+              id="fileInput"
+            />
+            <label
+              htmlFor="fileInput"
+              className="px-5 py-2 bg-[#1C70D3] text-white rounded-full cursor-pointer hover:bg-[#0A4EA3] transition"
+            >
+              Add file
+            </label>
+          </div>
+        </div>
+
+

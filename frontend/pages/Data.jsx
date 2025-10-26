@@ -90,7 +90,7 @@ const Data = () => {
                     <td className="px-4 py-2 border text-center">
                       <button
                         onClick={() => handleViewFile(item.id)}
-                        className="inline-flex items-center justify-center hover:scale-110 transition-transform"
+                        className="inline-flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
                         title="View PDF"
                       >
                         <FaFilePdf className="text-red-600 text-2xl" />
