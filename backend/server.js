@@ -1,12 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
-
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(
   cors({
@@ -14,6 +14,26 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.json());
+
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+app.use("/uploads", express.static(uploadDir));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "application/pdf"];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Only images or PDFs are allowed!"));
+  },
+});
 
 const db = new Pool({
   host: process.env.DB_HOST,
@@ -34,10 +54,9 @@ app.post("/verifyUser", async (req, res) => {
     if (result.rows.length > 0) {
       res.json({ success: true, user: result.rows[0] });
     } else {
-      res.status(400).json({
-        success: false,
-        message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
-      });
+      res
+        .status(400)
+        .json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
     }
   } catch (err) {
     res
@@ -46,10 +65,8 @@ app.post("/verifyUser", async (req, res) => {
   }
 });
 
-app.post("/pushData", async (req, res) => {
+app.post("/pushData", upload.single("file"), async (req, res) => {
   try {
-    console.log("📦 BODY RECEIVED:", req.body);
-
     const {
       customerName,
       date,
@@ -60,18 +77,21 @@ app.post("/pushData", async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
-      fileBase64,
     } = req.body;
 
+    const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+    const dateValue = date ? date.split("T")[0] : null;
+
     const sql = `
-      INSERT INTO drawing_records
+      INSERT INTO drawing_records 
       (customer_name, date, drawing_no, rev, customer_part_no, description,
-       material_main, material_sub, pcd_grade, file_base64)
+       material_main, material_sub, pcd_grade, file_url)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     `;
+
     await db.query(sql, [
       customerName,
-      date ? date.split("T")[0] : null,
+      dateValue,
       drawingNo,
       rev,
       customerPart,
@@ -79,12 +99,11 @@ app.post("/pushData", async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
-      fileBase64,
+      file_url,
     ]);
 
-    res.json({ success: true });
+    res.json({ success: true, message: "Data inserted successfully" });
   } catch (err) {
-    console.error("pushData Error:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 });
@@ -100,5 +119,10 @@ app.get("/getAllData", async (req, res) => {
   }
 });
 
+
+
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+

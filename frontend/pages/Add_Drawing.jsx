@@ -14,7 +14,7 @@ const Add_Drawing = () => {
     materialMain: "",
     materialSub: "",
     pcdGrade: "",
-    fileBase64: "",
+    file: null,
   });
 
   const [preview, setPreview] = useState(null);
@@ -25,49 +25,47 @@ const Add_Drawing = () => {
 
     if (files && files.length > 0) {
       const file = files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64 = reader.result.split(",")[1];
-        const isImage = file.type.startsWith("image/");
-        const isPDF = file.type === "application/pdf";
-        setForm((prev) => ({ ...prev, fileBase64: base64 }));
-        setFileType(isImage ? "image" : isPDF ? "pdf" : "other");
-        setPreview(isImage ? reader.result : isPDF ? file.name : null);
-      };
-      reader.readAsDataURL(file);
+      setForm({ ...form, file });
+
+      const isImage = file?.type?.startsWith("image/");
+      const isPDF = file?.type === "application/pdf";
+
+      setFileType(isImage ? "image" : isPDF ? "pdf" : "other");
+      setPreview(
+        isImage ? URL.createObjectURL(file) : isPDF ? file.name : null
+      );
     } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
+      setForm({ ...form, [name]: value });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const payload = {
-        customerName: form.customerName,
-        date: form.date,
-        drawingNo: form.drawingNo,
-        rev: form.rev,
-        customerPart: form.customerPart,
-        description: form.description,
-        materialMain: form.materialMain,
-        materialSub: form.materialSub,
-        pcdGrade: form.pcdGrade,
-        fileBase64: form.fileBase64,
-      };
+      const formData = new FormData();
+
+      Object.entries(form).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      const userId = localStorage.getItem("userId");
+      if (userId) {
+        formData.append("employee_drawing", userId);
+      } else {
+        alert(" ไม่พบข้อมูลผู้ใช้ในระบบ กรุณา login ใหม่");
+        return;
+      }
 
       const res = await axios.post(
         "https://halcyonone-internal.onrender.com/pushData",
-        payload,
+        formData,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
       if (res.data.success) {
-        alert("Submit Successfully!");
+        alert(" Submit Successfully!");
         setForm({
           customerName: "",
           date: "",
@@ -78,15 +76,15 @@ const Add_Drawing = () => {
           materialMain: "",
           materialSub: "",
           pcdGrade: "",
-          fileBase64: "",
+          file: null,
         });
         setPreview(null);
       } else {
-        alert("Submit Failed!");
+        alert(" Submit Failed!");
       }
     } catch (err) {
       console.error("Submit error:", err);
-      alert("Server Error!");
+      alert(" Server Error!");
     }
   };
 
@@ -99,31 +97,86 @@ const Add_Drawing = () => {
       >
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
           <div className="space-y-4 w-full">
-            {[
-              { label: "Customer Name", name: "customerName", type: "text" },
-              { label: "Date", name: "date", type: "date" },
-              { label: "Drawing No.", name: "drawingNo", type: "text" },
-              { label: "Rev.", name: "rev", type: "text" },
-              {
-                label: "Customer Part No.",
-                name: "customerPart",
-                type: "text",
-              },
-              { label: "Description", name: "description", type: "text" },
-            ].map((f) => (
-              <div key={f.name}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {f.label}
-                </label>
-                <input
-                  type={f.type}
-                  name={f.name}
-                  value={form[f.name]}
-                  onChange={handleChange}
-                  className="block w-full border border-gray-400 rounded-md px-3 py-2 focus:border-[#0B4EA2] text-black"
-                />
-              </div>
-            ))}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Customer Name
+              </label>
+              <input
+                type="text"
+                name="customerName"
+                value={form.customerName}
+                onChange={handleChange}
+                required
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 focus:border-[#0B4EA2] text-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                onClick={(e) => e.target.showPicker()}
+                required
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 focus:border-[#0B4EA2] text-gray-700 cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Drawing No.
+              </label>
+              <input
+                type="text"
+                name="drawingNo"
+                value={form.drawingNo}
+                onChange={handleChange}
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 text-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rev.
+              </label>
+              <input
+                type="text"
+                name="rev"
+                value={form.rev}
+                onChange={handleChange}
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 text-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Customer Part No.
+              </label>
+              <input
+                type="text"
+                name="customerPart"
+                value={form.customerPart}
+                onChange={handleChange}
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 text-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <input
+                type="text"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                className="block w-full border border-gray-400 rounded-md px-3 py-2 text-black"
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -199,6 +252,7 @@ const Add_Drawing = () => {
                   )}
                 </div>
               )}
+
               <input
                 type="file"
                 name="file"
@@ -231,3 +285,4 @@ const Add_Drawing = () => {
 };
 
 export default Add_Drawing;
+
