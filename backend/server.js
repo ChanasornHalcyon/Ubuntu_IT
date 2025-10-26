@@ -2,8 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const { Pool } = require("pg");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
@@ -16,18 +14,8 @@ app.use(
 );
 app.use(express.json());
 
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-app.use("/uploads", express.static(uploadDir));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
-});
-
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const allowed = ["image/jpeg", "image/png", "application/pdf"];
     if (allowed.includes(file.mimetype)) cb(null, true);
@@ -58,7 +46,7 @@ app.post("/verifyUser", async (req, res) => {
         .status(400)
         .json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
     }
-  } catch (err) {
+  } catch {
     res
       .status(500)
       .json({ success: false, message: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์" });
@@ -79,13 +67,14 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       pcdGrade,
     } = req.body;
 
-    const file_url = req.file ? `/uploads/${req.file.filename}` : null;
+    const file_base64 = req.file ? req.file.buffer.toString("base64") : null;
+
     const dateValue = date ? date.split("T")[0] : null;
 
     const sql = `
       INSERT INTO drawing_records 
       (customer_name, date, drawing_no, rev, customer_part_no, description,
-       material_main, material_sub, pcd_grade, file_url)
+       material_main, material_sub, pcd_grade, file_base64)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     `;
 
@@ -99,7 +88,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
       materialMain,
       materialSub,
       pcdGrade,
-      file_url,
+      file_base64,
     ]);
 
     res.json({ success: true, message: "Data inserted successfully" });
@@ -111,15 +100,28 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
 app.get("/getAllData", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT * FROM drawing_records ORDER BY id ASC"
+      "SELECT id, customer_name, date, drawing_no, rev, customer_part_no, description, material_main, material_sub, pcd_grade FROM drawing_records ORDER BY id ASC"
     );
     res.json({ success: true, data: result.rows });
-  } catch (err) {
+  } catch {
     res.status(500).json({ success: false });
   }
 });
 
+app.get("/getFile/:id", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT file_base64 FROM drawing_records WHERE id = $1",
+      [req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).send("File not found");
 
+    const fileBase64 = result.rows[0].file_base64;
+    res.json({ success: true, base64: fileBase64 });
+  } catch {
+    res.status(500).json({ success: false });
+  }
+});
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {

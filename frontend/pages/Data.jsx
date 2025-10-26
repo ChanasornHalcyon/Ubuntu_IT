@@ -5,6 +5,7 @@ import { FaFilePdf } from "react-icons/fa6";
 
 const Data = () => {
   const [data, setData] = useState([]);
+
   const fetchData = async () => {
     try {
       const res = await axios.get(
@@ -13,6 +14,22 @@ const Data = () => {
       setData(res.data.data);
     } catch (err) {
       console.error("Error fetching data:", err);
+    }
+  };
+
+  const handleViewFile = async (id) => {
+    try {
+      const res = await axios.get(
+        `https://halcyonone-internal.onrender.com/getFile/${id}`
+      );
+      if (res.data?.base64) {
+        const pdfUrl = `data:application/pdf;base64,${res.data.base64}`;
+        window.open(pdfUrl, "_blank");
+      } else {
+        alert("File not found!");
+      }
+    } catch (err) {
+      console.error("Error opening file:", err);
     }
   };
 
@@ -71,25 +88,19 @@ const Data = () => {
                     <td className="px-4 py-2 border text-black">{item.rev}</td>
 
                     <td className="px-4 py-2 border text-center">
-                      {item.file_url ? (
-                        <a
-                          href={`https://halcyonone-internal.onrender.com${item.file_url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center hover:scale-110 transition-transform"
-                          title="View PDF"
-                        >
-                          <FaFilePdf className="text-red-600 text-2xl" />
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
+                      <button
+                        onClick={() => handleViewFile(item.id)}
+                        className="inline-flex items-center justify-center hover:scale-110 transition-transform"
+                        title="View PDF"
+                      >
+                        <FaFilePdf className="text-red-600 text-2xl" />
+                      </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="text-center py-4 text-gray-500">
+                  <td colSpan="9" className="text-center py-4 text-gray-500">
                     ไม่มีข้อมูลในระบบ
                   </td>
                 </tr>
