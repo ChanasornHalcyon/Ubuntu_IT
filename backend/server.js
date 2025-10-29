@@ -81,7 +81,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
         .from("drawings")
         .upload(fileName, req.file.buffer, {
           contentType: req.file.mimetype,
-          upsert: false,
+        upsert: true,
         });
 
       if (error) throw error;
