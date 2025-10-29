@@ -115,7 +115,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
     res.json({ success: true, message: "Drawing added successfully!" });
   } catch (err) {
     console.error("pushData Error:", err);
-    res.status(500).json({ success: false, message: "ไฟล์ซ้ำ" });
+    res.status(500).json({ success: false, message: "ชื่อไฟล์ซ้ำ" });
   }
 });
 
@@ -185,13 +185,8 @@ app.post("/searchDrawing", async (req, res) => {
     const result = await db.query(sql, params);
     res.json({ success: true, data: result.rows });
   } catch (err) {
-    console.error("pushData Error:", err);
-
-    if (err.statusCode === "409" || err.status === 409) {
-      return res.status(409).json({ success: false, message: "ชื่อไฟล์ซ้ำ" });
-    }
-
-    res.status(500).json({ success: false, message: "Server Error" });
+    console.error("searchDrawing Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

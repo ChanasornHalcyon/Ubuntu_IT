@@ -84,7 +84,7 @@ const Add_Drawing = () => {
       }
     } catch (err) {
       if (err.response) {
-        alert(err.response.data?.message || "Server Error!");
+        alert(err.response.data?.message);
       } else {
         alert("Network Error!");
       }
