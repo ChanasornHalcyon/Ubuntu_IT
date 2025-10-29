@@ -122,7 +122,7 @@ app.post("/pushData", upload.single("file"), async (req, res) => {
 app.get("/getAllData", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT * FROM drawing_records ORDER BY id ASC"
+      "SELECT * FROM drawing_records ORDER BY id DESC"
     );
     res.json({ success: true, data: result.rows });
   } catch (err) {
