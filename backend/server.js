@@ -1,197 +1,675 @@
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
-const multer = require("multer");
-const { createClient } = require("@supabase/supabase-js");
+const mysql = require("mysql2/promise");
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
-
-app.use(
-  cors({
-    origin: ["https://halcyon-one-internal.vercel.app"],
-    credentials: true,
-  })
-);
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  fileFilter: (req, file, res) => {
-    const allowed = ["image/jpeg", "image/png", "application/pdf"];
-    if (allowed.includes(file.mimetype)) res(null, true);
-    else res(new Error("Only images or PDFs are allowed!"));
-  },
-});
-
-const db = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
-  ssl: { rejectUnauthorized: false },
-});
+let db;
+const initMySQL = async () => {
+  db = await mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "khemnak1530",
+    database: "halcyon_it",
+  });
+};
+initMySQL();
 
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
+  const [rows] = await db.query(
+    "SELECT id, username, role FROM user WHERE username=? AND password=?",
+    [username, password]
+  );
+
+  if (rows.length > 0) {
+    res.json({ success: true, user: rows[0] });
+  } else {
+    res.json({ success: false });
+  }
+});
+
+app.post("/addUser", async (req, res) => {
+  const { name, username, password, role } = req.body;
   try {
-    const result = await db.query(
-      "SELECT id, username, password FROM users WHERE username = $1 AND password = $2",
-      [username, password]
+    await db.query(
+      "INSERT INTO user (name, username, password, role) VALUES (?, ?, ?, ?)",
+      [name, username, password, role]
     );
-    if (result.rows.length > 0) {
-      res.json({ success: true, user: result.rows[0] });
-    } else {
-      res
-        .status(400)
-        .json({ success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
-    }
+    res.json({ success: true, message: "User added" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ success: false, message: "เกิดข้อผิดพลาดของเซิร์ฟเวอร์" });
+    console.error("Add user error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
-
-app.post("/pushData", upload.single("file"), async (req, res) => {
+app.put("/updatePassword", async (req, res) => {
+  const { id, password } = req.body;
   try {
-    const {
-      customerName,
-      date,
-      drawingNo,
-      rev,
-      customerPart,
-      description,
-      materialMain,
-      materialSub,
-      pcdGrade,
-    } = req.body;
-
-    let file_url = null;
-
-    if (req.file) {
-      const fileName = `${req.file.originalname}`;
-      const { data, error } = await supabase.storage
-        .from("drawings")
-        .upload(fileName, req.file.buffer, {
-          contentType: req.file.mimetype,
-          upsert: false,
-        });
-
-      if (error) throw error;
-
-      const { data: publicURL } = supabase.storage
-        .from("drawings")
-        .getPublicUrl(fileName);
-
-      file_url = publicURL.publicUrl;
-    }
-    const sql = `
-      INSERT INTO drawing_records 
-      ( customer_name, date, drawing_no, rev, customer_part_no, description,
-       material_main, material_sub, pcd_grade, file_url)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-    `;
-
-    await db.query(sql, [
-      customerName,
-      date,
-      drawingNo,
-      rev,
-      customerPart,
-      description,
-      materialMain,
-      materialSub,
-      pcdGrade,
-      file_url,
-    ]);
-
-    res.json({ success: true, message: "Drawing added successfully!" });
+    await db.query("UPDATE user SET password = ? WHERE id = ?", [password, id]);
+    res.json({ success: true, message: "Password updated successfully" });
   } catch (err) {
-    console.error("pushData Error:", err);
-    res.status(500).json({ success: false, message: "ชื่อไฟล์ซ้ำ" });
-  }
-});
-
-app.get("/getAllData", async (req, res) => {
-  try {
-    const result = await db.query(
-      "SELECT * FROM drawing_records ORDER BY id DESC"
-    );
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    res.status(500).json({ success: false });
-  }
-});
-
-app.post("/searchDrawing", async (req, res) => {
-  try {
-    const {
-      customerName,
-      date,
-      drawingNo,
-      customerPart,
-      description,
-      materialMain,
-      pcdGrade,
-    } = req.body;
-
-    let sql = "SELECT * FROM drawing_records WHERE 1=1";
-    const params = [];
-    let paramIndex = 1;
-
-    if (customerName) {
-      sql += ` AND customer_name ILIKE $${paramIndex++}`;
-      params.push(`%${customerName}%`);
-    }
-
-    if (date) {
-      sql += ` AND DATE(date) = $${paramIndex++}`;
-      params.push(date);
-    }
-
-    if (drawingNo) {
-      sql += ` AND drawing_no ILIKE $${paramIndex++}`;
-      params.push(`%${drawingNo}%`);
-    }
-
-    if (customerPart) {
-      sql += ` AND customer_part_no ILIKE $${paramIndex++}`;
-      params.push(`%${customerPart}%`);
-    }
-
-    if (description) {
-      sql += ` AND description ILIKE $${paramIndex++}`;
-      params.push(`%${description}%`);
-    }
-
-    if (materialMain) {
-      sql += ` AND material_main ILIKE $${paramIndex++}`;
-      params.push(`%${materialMain}%`);
-    }
-
-    if (pcdGrade) {
-      sql += ` AND pcd_grade ILIKE $${paramIndex++}`;
-      params.push(`%${pcdGrade}%`);
-    }
-
-    sql += " ORDER BY id ASC";
-
-    const result = await db.query(sql, params);
-    res.json({ success: true, data: result.rows });
-  } catch (err) {
-    console.error("searchDrawing Error:", err);
+    console.error("Update password error:", err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+app.get("/getUser", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT id, username, role,name FROM user");
+    res.json({
+      success: true,
+      users: rows,
+    });
+  } catch (err) {
+    console.error("Fetch users error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 });
+app.delete("/deleteUser/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.query("DELETE FROM user WHERE id = ?", [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Delete user error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+// app.post("/pushData", upload.single("file"), async (req, res) => {
+//   try {
+//     const {
+//       customerName,
+//       date,
+//       drawingNo,
+//       rev,
+//       customerPart,
+//       description,
+//       materialMain,
+//       price,
+//       cost,
+//       CoolantHole,
+//       Flute,
+//       Cloating,
+//       A1,
+//       A2,
+//       A3,
+//       D1,
+//       D2,
+//       D3,
+//       CL1,
+//       CL2,
+//       TL,
+//       type,
+//       username,
+//     } = req.body;
+
+//     let file_url = null;
+
+//     if (req.file) {
+//       const folder = customerName?.trim().replace(/\s+/g, "_") || "Unknown";
+//       file_url = `/uploads/${folder}/${req.file.originalname}`;
+//     }
+
+//     const insertSQL = `
+//       INSERT INTO drawing_records 
+//       (customer_name, date, drawing_no, rev, customer_part_no, description,
+//        material_main, price, cost, coolant_hole, flute, coating, file_url,
+//        A1, A2, A3, D1, D2, D3, CL1, CL2, TL, type)
+//       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+//     `;
+
+//     const [result] = await db.query(insertSQL, [
+//       customerName,
+//       date,
+//       drawingNo,
+//       rev,
+//       customerPart,
+//       description,
+//       materialMain,
+//       price,
+//       cost,
+//       CoolantHole,
+//       Flute,
+//       Cloating,
+//       file_url,
+//       A1,
+//       A2,
+//       A3,
+//       D1,
+//       D2,
+//       D3,
+//       CL1,
+//       CL2,
+//       TL,
+//       type,
+//     ]);
+
+//     const newId = result.insertId;
+//     const logSQL = `
+//       INSERT INTO drawing_logs (drawing_id, action_type, action_by, action_detail)
+//       VALUES (?, 'ADD', ?, ?)
+//     `;
+
+//     const actionDetail = JSON.stringify({
+//       customerName,
+//       date,
+//       drawingNo,
+//       rev,
+//       customerPart,
+//       description,
+//       materialMain,
+//       price,
+//       cost,
+//       CoolantHole,
+//       Flute,
+//       Cloating,
+//       file_url,
+//       A1,
+//       A2,
+//       A3,
+//       D1,
+//       D2,
+//       D3,
+//       CL1,
+//       CL2,
+//       TL,
+//       type,
+//     });
+
+//     await db.query(logSQL, [newId, username, actionDetail]);
+
+//     res.json({
+//       success: true,
+//       message: "Drawing uploaded successfully!",
+//       drawing_id: newId,
+//     });
+//   } catch (err) {
+//     console.error("Upload error:", err);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+// app.get("/getDrawingLogs", async (req, res) => {
+//   try {
+//     const [rows] = await db.query(`
+//       SELECT id, drawing_id, action_type, action_by, action_detail, created_at
+//       FROM drawing_logs
+//       ORDER BY created_at DESC
+//     `);
+
+//     res.json({ success: true, data: rows });
+//   } catch (err) {
+//     console.error("Get Logs Error:", err);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// app.get("/checkDrawingNo", async (req, res) => {
+//   try {
+//     const { drawingNo } = req.query;
+
+//     const sql = `SELECT COUNT(*) AS count FROM drawing_records WHERE drawing_no = ?`;
+//     const [rows] = await db.query(sql, [drawingNo]);
+
+//     res.json({ exists: rows[0].count > 0 });
+//   } catch (err) {
+//     console.error("Check error:", err);
+//     res.status(500).json({ exists: false });
+//   }
+// });
+
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// app.get("/getAllData", async (req, res) => {
+//   try {
+//     const [rows] = await db.query(
+//       "SELECT * FROM drawing_records ORDER BY id DESC"
+//     );
+//     res.json({ success: true, data: rows });
+//   } catch (err) {
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+// app.post("/searchDrawing", async (req, res) => {
+//   try {
+//     const {
+//       customerName,
+//       startDate,
+//       endDate,
+//       drawingNo,
+//       rev,
+//       customerPart,
+//       description,
+//       materialMain,
+//       pcdGrade,
+//       coolantHole,
+//       flute,
+//       cloating,
+//       shankMaterial,
+//       shankShape,
+//       type,
+//       A1,
+//       A2,
+//       A3,
+//       D1,
+//       D2,
+//       D3,
+//       CL1,
+//       CL2,
+//       TL,
+//     } = req.body;
+
+//     let sql = "SELECT * FROM drawing_records WHERE 1=1";
+//     const params = [];
+
+//     if (customerName) {
+//       sql += " AND LOWER(customer_name) LIKE LOWER(?)";
+//       params.push(`%${customerName}%`);
+//     }
+
+//     if (startDate && endDate) {
+//       sql += " AND DATE(`date`) BETWEEN ? AND ?";
+//       params.push(startDate, endDate);
+//     } else if (startDate) {
+//       sql += " AND DATE(`date`) >= ?";
+//       params.push(startDate);
+//     } else if (endDate) {
+//       sql += " AND DATE(`date`) <= ?";
+//       params.push(endDate);
+//     }
+
+//     if (drawingNo) {
+//       sql += " AND LOWER(drawing_no) LIKE LOWER(?)";
+//       params.push(`%${drawingNo}%`);
+//     }
+//     if (rev) {
+//       sql += " AND LOWER(rev) LIKE LOWER(?)";
+//       params.push(`%${rev}%`);
+//     }
+//     if (customerPart) {
+//       sql += " AND LOWER(customer_part_no) LIKE LOWER(?)";
+//       params.push(`%${customerPart}%`);
+//     }
+//     if (description) {
+//       sql += " AND LOWER(description) LIKE LOWER(?)";
+//       params.push(`%${description}%`);
+//     }
+//     if (materialMain) {
+//       sql += " AND LOWER(material_main) LIKE LOWER(?)";
+//       params.push(`%${materialMain}%`);
+//     }
+//     if (pcdGrade) {
+//       sql += " AND LOWER(pcd_grade) LIKE LOWER(?)";
+//       params.push(`%${pcdGrade}%`);
+//     }
+//     if (coolantHole) {
+//       sql += " AND LOWER(coolant_hole) LIKE LOWER(?)";
+//       params.push(`%${coolantHole}%`);
+//     }
+//     if (flute) {
+//       sql += " AND LOWER(flute) LIKE LOWER(?)";
+//       params.push(`%${flute}%`);
+//     }
+//     if (cloating) {
+//       sql += " AND LOWER(coating) LIKE LOWER(?)";
+//       params.push(`%${cloating}%`);
+//     }
+//     if (shankMaterial) {
+//       sql += " AND LOWER(shank_material) LIKE LOWER(?)";
+//       params.push(`%${shankMaterial}%`);
+//     }
+//     if (shankShape) {
+//       sql += " AND LOWER(shank_shape) LIKE LOWER(?)";
+//       params.push(`%${shankShape}%`);
+//     }
+//     if (type) {
+//       sql += " AND LOWER(type) LIKE LOWER(?)";
+//       params.push(`%${type}%`);
+//     }
+//     if (A1) {
+//       sql += " AND LOWER(A1) LIKE LOWER(?)";
+//       params.push(`%${A1}%`);
+//     }
+//     if (A2) {
+//       sql += " AND LOWER(A2) LIKE LOWER(?)";
+//       params.push(`%${A2}%`);
+//     }
+//     if (A3) {
+//       sql += " AND LOWER(A3) LIKE LOWER(?)";
+//       params.push(`%${A3}%`);
+//     }
+
+//     if (D1) {
+//       sql += " AND LOWER(D1) LIKE LOWER(?)";
+//       params.push(`%${D1}%`);
+//     }
+//     if (D2) {
+//       sql += " AND LOWER(D2) LIKE LOWER(?)";
+//       params.push(`%${D2}%`);
+//     }
+//     if (D3) {
+//       sql += " AND LOWER(D3) LIKE LOWER(?)";
+//       params.push(`%${D3}%`);
+//     }
+
+//     if (CL1) {
+//       sql += " AND LOWER(CL1) LIKE LOWER(?)";
+//       params.push(`%${CL1}%`);
+//     }
+//     if (CL2) {
+//       sql += " AND LOWER(CL2) LIKE LOWER(?)";
+//       params.push(`%${CL2}%`);
+//     }
+
+//     if (TL) {
+//       sql += " AND LOWER(TL) LIKE LOWER(?)";
+//       params.push(`%${TL}%`);
+//     }
+
+//     sql += " ORDER BY id ASC";
+
+//     const [rows] = await db.query(sql, params);
+
+//     if (rows.length === 0) {
+//       return res.json({ success: false, message: "ไม่พบข้อมูลตามเงื่อนไข" });
+//     }
+
+//     res.json({ success: true, data: rows });
+//   } catch (err) {
+//     console.error("Search error:", err);
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// app.put("/updateDrawing/:id", upload.single("file"), async (req, res) => {
+//   const drawingId = req.params.id;
+//   const updatedData = req.body;
+//   const file = req.file;
+
+//   try {
+//     const formattedDate =
+//       updatedData.date && /^\d{4}-\d{2}-\d{2}$/.test(updatedData.date)
+//         ? updatedData.date
+//         : null;
+
+//     const [oldRows] = await db.query(
+//       "SELECT * FROM drawing_records WHERE id = ?",
+//       [drawingId]
+//     );
+
+//     if (!oldRows.length) {
+//       return res.status(404).json({ success: false });
+//     }
+
+//     const oldData = oldRows[0];
+
+//     // ⛔ เก็บประวัติก่อนแก้ไข → 1 ครั้งพอ
+//     await db.query(
+//       `INSERT INTO drawing_history (drawing_id, modified_by, data)
+//        VALUES (?, ?, ?)`,
+//       [drawingId, updatedData.updated_by || "unknown", JSON.stringify(oldData)]
+//     );
+
+//     let fileUrl = oldData.file_url;
+
+//     if (file) {
+//       const customerFolder =
+//         updatedData.customer_name?.trim().replace(/\s+/g, "_") || "Unknown";
+
+//       const finalPath = path.join(uploadDir, customerFolder, file.originalname);
+
+//       if (!fs.existsSync(path.dirname(finalPath))) {
+//         fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+//       }
+
+//       fs.renameSync(file.path, finalPath);
+
+//       fileUrl = `/uploads/${customerFolder}/${file.originalname}`;
+//     }
+
+//     // UPDATE drawing
+//     await db.query(
+//       `
+//       UPDATE drawing_records
+//       SET 
+//         customer_name = ?, 
+//         date = ?, 
+//         drawing_no = ?, 
+//         rev = ?, 
+//         description = ?, 
+//         material_main = ?, 
+//         price = ?, 
+//         cost = ?,
+//         coolant_hole = ?, 
+//         flute = ?, 
+//         coating = ?,
+//         type = ?, 
+//         A1 = ?, 
+//         A2 = ?, 
+//         A3 = ?, 
+//         D1 = ?, 
+//         D2 = ?, 
+//         D3 = ?, 
+//         CL1 = ?, 
+//         CL2 = ?, 
+//         TL = ?, 
+//         file_url = ?
+//       WHERE id = ?
+//       `,
+//       [
+//         updatedData.customer_name,
+//         formattedDate,
+//         updatedData.drawing_no,
+//         updatedData.rev,
+//         updatedData.description,
+//         updatedData.material_main,
+//         updatedData.price,
+//         updatedData.cost,
+//         updatedData.coolant_hole,
+//         updatedData.flute,
+//         updatedData.coating,
+//         updatedData.type,
+//         updatedData.A1,
+//         updatedData.A2,
+//         updatedData.A3,
+//         updatedData.D1,
+//         updatedData.D2,
+//         updatedData.D3,
+//         updatedData.CL1,
+//         updatedData.CL2,
+//         updatedData.TL,
+//         fileUrl,
+//         drawingId,
+//       ]
+//     );
+
+//     // LOG (ข้อมูลก่อนแก้ไข)
+//     const oldDatas = {
+//       customerName: oldData.customer_name,
+//       drawingNo: oldData.drawing_no,
+//       rev: oldData.rev,
+//       customerPart: oldData.customer_part_no,
+//       description: oldData.description,
+//       materialMain: oldData.material_main,
+//       price: oldData.price,
+//       cost: oldData.cost,
+//       CoolantHole: oldData.coolant_hole,
+//       Flute: oldData.flute,
+//       type: oldData.type,
+//       file_url: oldData.file_url,
+//     };
+
+//     await db.query(
+//       `INSERT INTO drawing_logs (drawing_id, action_type, action_by, action_detail)
+//        VALUES (?, 'EDIT', ?, ?)`,
+//       [drawingId, updatedData.updated_by || "unknown", JSON.stringify(oldDatas)]
+//     );
+
+//     res.json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+// app.delete("/deleteDrawingHistory/:id", async (req, res) => {
+//   const id = Number(req.params.id);
+//   const deletedBy = req.query.deleted_by || "unknown";
+
+//   try {
+//     // ------------------ CASE 1: Delete ALL history + record ------------------
+//     if (id === 0) {
+//       const drawingId = req.query.drawingId;
+
+//       // ดึงข้อมูลก่อนลบ เพื่อเก็บลง Logs ด้วย
+//       const [rows] = await db.query(
+//         "SELECT * FROM drawing_records WHERE id = ?",
+//         [drawingId]
+//       );
+
+//       let detail = {};
+//       if (rows.length) {
+//         const old = rows[0];
+//         detail = {
+//           customerName: old.customer_name || "",
+//           drawingNo: old.drawing_no || "",
+//           rev: old.rev || "",
+//           customerPart: old.customer_part_no || "",
+//           description: old.description || "",
+//           materialMain: old.material_main || "",
+//           price: old.price || "",
+//           cost: old.cost || "",
+//           CoolantHole: old.coolant_hole || "",
+//           Flute: old.flute || "",
+//           type: old.type || "",
+//           file_url: old.file_url || "",
+//         };
+//       }
+
+//       await db.query(
+//         `INSERT INTO drawing_logs (drawing_id, action_type, action_by, action_detail)
+//          VALUES (?, 'DELETE', ?, ?)`,
+//         [
+//           drawingId,
+//           deletedBy,
+//           JSON.stringify({
+//             reason: "Delete all history + record",
+//             data_before_delete: detail,
+//           }),
+//         ]
+//       );
+
+//       await db.query("DELETE FROM drawing_history WHERE drawing_id = ?", [
+//         drawingId,
+//       ]);
+//       await db.query("DELETE FROM drawing_records WHERE id = ?", [drawingId]);
+
+//       return res.json({ success: true });
+//     }
+
+//     // ------------------ CASE 2: Delete only ONE history row ------------------
+//     const [rows] = await db.query(
+//       "SELECT * FROM drawing_history WHERE id = ?",
+//       [id]
+//     );
+
+//     if (!rows.length) {
+//       return res.status(404).json({ success: false });
+//     }
+
+//     const deletedRow = rows[0];
+//     const drawingId = deletedRow.drawing_id;
+
+//     // แปลงข้อมูลเก่า
+//     let parsed = {};
+//     try {
+//       parsed = JSON.parse(deletedRow.data);
+//     } catch {
+//       parsed = {};
+//     }
+
+//     // 🔥 Mapping ให้เป็นรูปแบบเดียวกับ ADD / EDIT logs
+//     const detail = {
+//       customerName: parsed.customer_name || "",
+//       drawingNo: parsed.drawing_no || "",
+//       rev: parsed.rev || "",
+//       customerPart: parsed.customer_part_no || "",
+//       description: parsed.description || "",
+//       materialMain: parsed.material_main || "",
+//       price: parsed.price || "",
+//       cost: parsed.cost || "",
+//       CoolantHole: parsed.coolant_hole || "",
+//       Flute: parsed.flute || "",
+//       type: parsed.type || "",
+//       file_url: parsed.file_url || "",
+//     };
+
+//     // บันทึกลง Logs ก่อนลบจริง
+//     await db.query(
+//       `INSERT INTO drawing_logs (drawing_id, action_type, action_by, action_detail)
+//        VALUES (?, 'DELETE', ?, ?)`,
+//       [
+//         drawingId,
+//         deletedBy,
+//         JSON.stringify({
+//           deleted_history_id: id,
+//           data_before_delete: detail,
+//           deleted_at: new Date(),
+//         }),
+//       ]
+//     );
+
+//     await db.query("DELETE FROM drawing_history WHERE id = ?", [id]);
+
+//     res.json({ success: true });
+//   } catch (err) {
+//     console.error("Delete history error:", err);
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+
+// app.get("/getDrawingHistory/:id", async (req, res) => {
+//   const drawingId = req.params.id;
+//   try {
+//     const [currentRows] = await db.query(
+//       "SELECT *, NOW() AS modified_at FROM drawing_records WHERE id = ?",
+//       [drawingId]
+//     );
+
+//     const [historyRows] = await db.query(
+//       "SELECT * FROM drawing_history WHERE drawing_id = ? ORDER BY modified_at DESC",
+//       [drawingId]
+//     );
+
+//     const result = [];
+
+//     if (currentRows.length > 0) {
+//       const cur = currentRows[0];
+//       result.push({
+//         id: 0,
+//         modified_at: cur.modified_at,
+//         modified_by: cur.updated_by || "Current Version",
+//         data: JSON.stringify(cur),
+//       });
+//     }
+
+//     result.push(...historyRows);
+//     res.json({ success: true, data: result });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+const PORT = 8000;
+app.listen(PORT, () =>
+  console.log(`🚀 Server running at http://localhost:${PORT}`)
+);
