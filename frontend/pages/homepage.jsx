@@ -1,17 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { motion } from "framer-motion";
+import ModalITForm from "./components/ModalITForm";
 
 const Homepage = () => {
   const [role, setRole] = useState("");
-  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const clickCard = (path) => {
-    router.push({
-      pathname: `/${path}`,
-      query: { role },
-    });
+  const handleSubmit = async (payload) => {
+    setSubmitting(true);
+    try {
+      console.log("FORM DATA:", [...payload]);
+
+    } catch (err) {
+      console.error(err);
+    }
+    setSubmitting(false);
+    setShowModal(false);
   };
 
   useEffect(() => {
@@ -26,44 +32,31 @@ const Homepage = () => {
      border-gray-300 hover:shadow-[0_6px_20px_rgba(0,0,0,0.15)] \
      hover:border-[#1C70D3] hover:bg-gradient-to-br hover:from-white hover:to-blue-50";
 
-  const cards = [];
-  if (role === "Admin") {
-    cards.push({ label: "Users_Management", path: "Users_Management" });
-    cards.push({ label: "Users_Logs", path: "Users_Logs" });
-  } else {
-    cards.push(
-      { label: "IT_Form", path: "IT_Form" },
-      // { label: "Search_Drawing", path: "Search_Drawing" }
-    );
-  }
-
   return (
     <div className="container mx-auto max-w-[1920px] h-dvh bg-[#F8F8FF] relative">
       <Navbar />
 
       <div className="py-40 md:py-32 flex justify-center">
-        <div
-          className={`grid gap-10 ${cards.length === 1
-            ? "grid-cols-1 max-w-[350px]"
-            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-2 max-w-2xl"
-            }`}
+        <motion.div
+          whileHover={{ scale: 1.06, y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ duration: 0.12, ease: "easeOut" }}
+          onClick={() => setShowModal(true)}
+          className={cardClass}
         >
-          {cards.map((card) => (
-            <motion.div
-              key={card.path}
-              whileHover={{ scale: 1.06, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => clickCard(card.path)}
-              transition={{ duration: 0.12, ease: "easeOut" }}
-              className={cardClass}
-            >
-              <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
-                {card.label}
-              </span>
-            </motion.div>
-          ))}
-        </div>
+          <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
+            IT Form
+          </span>
+        </motion.div>
       </div>
+
+      {showModal && (
+        <ModalITForm
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSubmit}
+          submitting={submitting}
+        />
+      )}
     </div>
   );
 };

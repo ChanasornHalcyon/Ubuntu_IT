@@ -9,7 +9,6 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-
 let db;
 const initMySQL = async () => {
   db = await mysql.createConnection({
@@ -24,7 +23,7 @@ initMySQL();
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
   const [rows] = await db.query(
-    "SELECT id, username, role FROM user WHERE username=? AND password=?",
+    "SELECT id, username, role, company FROM user WHERE username=? AND password=?",
     [username, password]
   );
 
@@ -48,6 +47,7 @@ app.post("/addUser", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 app.put("/updatePassword", async (req, res) => {
   const { id, password } = req.body;
   try {
@@ -71,6 +71,7 @@ app.get("/getUser", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
+
 app.delete("/deleteUser/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -119,7 +120,7 @@ app.delete("/deleteUser/:id", async (req, res) => {
 //     }
 
 //     const insertSQL = `
-//       INSERT INTO drawing_records 
+//       INSERT INTO drawing_records
 //       (customer_name, date, drawing_no, rev, customer_part_no, description,
 //        material_main, price, cost, coolant_hole, flute, coating, file_url,
 //        A1, A2, A3, D1, D2, D3, CL1, CL2, TL, type)
@@ -439,28 +440,28 @@ app.delete("/deleteUser/:id", async (req, res) => {
 //     await db.query(
 //       `
 //       UPDATE drawing_records
-//       SET 
-//         customer_name = ?, 
-//         date = ?, 
-//         drawing_no = ?, 
-//         rev = ?, 
-//         description = ?, 
-//         material_main = ?, 
-//         price = ?, 
+//       SET
+//         customer_name = ?,
+//         date = ?,
+//         drawing_no = ?,
+//         rev = ?,
+//         description = ?,
+//         material_main = ?,
+//         price = ?,
 //         cost = ?,
-//         coolant_hole = ?, 
-//         flute = ?, 
+//         coolant_hole = ?,
+//         flute = ?,
 //         coating = ?,
-//         type = ?, 
-//         A1 = ?, 
-//         A2 = ?, 
-//         A3 = ?, 
-//         D1 = ?, 
-//         D2 = ?, 
-//         D3 = ?, 
-//         CL1 = ?, 
-//         CL2 = ?, 
-//         TL = ?, 
+//         type = ?,
+//         A1 = ?,
+//         A2 = ?,
+//         A3 = ?,
+//         D1 = ?,
+//         D2 = ?,
+//         D3 = ?,
+//         CL1 = ?,
+//         CL2 = ?,
+//         TL = ?,
 //         file_url = ?
 //       WHERE id = ?
 //       `,
@@ -634,7 +635,6 @@ app.delete("/deleteUser/:id", async (req, res) => {
 //     res.status(500).json({ success: false });
 //   }
 // });
-
 
 // app.get("/getDrawingHistory/:id", async (req, res) => {
 //   const drawingId = req.params.id;

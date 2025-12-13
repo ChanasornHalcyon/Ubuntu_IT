@@ -20,6 +20,7 @@ const Index = () => {
       if (res.data.success) {
         localStorage.setItem("userId", res.data.user.id);
         localStorage.setItem("username", res.data.user.username);
+        localStorage.setItem("company", res.data.user.company);
         localStorage.setItem("role", res.data.user.role);
 
         router.push("/homepage");
