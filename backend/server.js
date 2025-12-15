@@ -67,6 +67,30 @@ app.post("/ITForm", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+app.get("/getITForm", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        id,
+        purpose,
+        detail,
+        reason,
+        spec,
+        requester,
+        department,
+        request_date,
+        required_date,
+        created_at
+      FROM it_requests
+      ORDER BY created_at DESC
+    `);
+
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // app.post("/addUser", async (req, res) => {
 //   const { name, username, password, role } = req.body;

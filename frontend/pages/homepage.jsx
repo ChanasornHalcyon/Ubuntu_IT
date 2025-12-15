@@ -2,23 +2,15 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { motion } from "framer-motion";
 import ModalITForm from "./components/ModalITForm";
-
+import { useRouter } from "next/router";
 const Homepage = () => {
+  const router = useRouter();
   const [role, setRole] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (payload) => {
-    setSubmitting(true);
-    try {
-      console.log("FORM DATA:", [...payload]);
-
-    } catch (err) {
-      console.error(err);
-    }
-    setSubmitting(false);
-    setShowModal(false);
-  };
+  const openPending = () => {
+    router.push("./Pending_Form")
+  }
 
   useEffect(() => {
     const userRole = localStorage.getItem("role");
@@ -35,20 +27,33 @@ const Homepage = () => {
   return (
     <div className="container mx-auto max-w-[1920px] h-dvh bg-[#F8F8FF] relative">
       <Navbar />
-
       <div className="py-40 md:py-32 flex justify-center">
-        <motion.div
-          whileHover={{ scale: 1.06, y: -2 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ duration: 0.12, ease: "easeOut" }}
-          onClick={() => setShowModal(true)}
-          className={cardClass}
-        >
-          <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
-            IT Form
-          </span>
-        </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            onClick={() => setShowModal(true)}
+            className={cardClass}
+          >
+            <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
+              IT_Form
+            </span>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className={cardClass}
+          >
+            <span onClick={openPending} className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
+              Pending_Form
+            </span>
+          </motion.div>
+        </div>
       </div>
+
 
       {showModal && <ModalITForm onClose={() => setShowModal(false)} />}
     </div>

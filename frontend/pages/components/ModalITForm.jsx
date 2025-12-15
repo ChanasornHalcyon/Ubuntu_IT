@@ -24,6 +24,7 @@ const ModalITForm = ({ onClose }) => {
         try {
             setSubmitting(true);
             await axios.post("http://localhost:8000/ITForm", form);
+            alert("ส่งฟอร์มสำเร็จ");
             onClose();
         } catch (err) {
             console.error(err);
@@ -57,7 +58,7 @@ const ModalITForm = ({ onClose }) => {
                 <div className="bg-white w-[380px] sm:w-[520px] md:w-[500px] rounded-2xl shadow-xl">
                     <div className="p-5 border-b flex justify-between items-center">
                         <h2 className="text-2xl font-semibold text-black">แบบฟอร์มร้องขอ IT</h2>
-                        <button onClick={onClose} className="text-2xl text-gray-500">✕</button>
+                        <button onClick={onClose} className="text-2xl text-gray-500 cursor-pointer">✕</button>
                     </div>
 
                     <div className="p-6 space-y-5">
