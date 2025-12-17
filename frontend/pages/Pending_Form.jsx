@@ -7,10 +7,15 @@ const Pending_Form = () => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [approvedIds, setApprovedIds] = useState([]);
 
     const handleApproveSuccess = (id) => {
-        setApprovedIds((prev) => [...prev, id]);
+        setData((prev) =>
+            prev.map((item) =>
+                item.id === id
+                    ? { ...item, status: "APPROVED" }
+                    : item
+            )
+        );
     };
 
     const getData = async () => {
