@@ -172,6 +172,7 @@ app.post("/ITFixForm", async (req, res) => {
     const {
       purpose,
       detail,
+      tools,
       requester,
       department,
       request_date,
@@ -180,9 +181,17 @@ app.post("/ITFixForm", async (req, res) => {
 
     await db.query(
       `INSERT INTO it_fixrequest
-   (purpose, detail, requester, department, request_date, required_date)
-    VALUES (?, ?, ?, ?, ?, ?)`,
-      [purpose, detail, requester, department, request_date, required_date]
+   (purpose, detail,tools, requester, department, request_date, required_date)
+    VALUES (?, ?, ?, ?,?, ?, ?)`,
+      [
+        purpose,
+        detail,
+        tools,
+        requester,
+        department,
+        request_date,
+        required_date,
+      ]
     );
 
     const [users] = await db.query(
@@ -231,6 +240,7 @@ app.post("/ITFixForm", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+
 app.get("/ITDashboard", async (req, res) => {
   try {
     const { status, startDate, endDate } = req.query;

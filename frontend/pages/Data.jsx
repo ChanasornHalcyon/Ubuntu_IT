@@ -53,14 +53,16 @@ const Data = () => {
     };
 
     useEffect(() => {
-        if (isDateSelected) fetchData();
-    }, [status]);
+        if (isDateSelected) {
+            fetchData();
+        }
+    }, [status, startDate, endDate]);
 
     const data = {
         labels: chartData.map((d) => formatDate(d.date)),
         datasets: [
             {
-                label: `จำนวนคำขอ (${status})`,
+                label: `จำนวน (${status})`,
                 data: chartData.map((d) => d.total),
                 backgroundColor: status === "PENDING" ? "#FF3366" : "#22c55e",
                 borderColor: status === "PENDING" ? "#FF3366" : "#16a34a",
@@ -77,32 +79,33 @@ const Data = () => {
             <div className="pt-24 flex justify-center px-4">
                 <div className="w-full max-w-4xl space-y-6">
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div
+                    <div className="flex justify-center gap-3">
+                        <button
                             onClick={() => setStatus("PENDING")}
-                            className={`cursor-pointer px-4 py-3 rounded-lg text-center text-sm font-medium transition
-                ${status === "PENDING"
-                                    ? "bg-[#FF3366] text-white shadow"
-                                    : "bg-white hover:bg-rose-50"
+                            className={`px-8 h-11 rounded-xl text-sm font-semibold transition-all cursor-pointer  ${status === "PENDING"
+
+                                ? "bg-[#FF3366] text-white shadow-md"
+                                : "bg-white text-[#FF3366] border border-[#FF3366]/40 hover:bg-[#FF3366]/5"
                                 }`}
                         >
                             Pending
-                        </div>
+                        </button>
 
-                        <div
+                        <button
                             onClick={() => setStatus("APPROVED")}
-                            className={`cursor-pointer px-4 py-3 rounded-lg text-center text-sm font-medium transition
-                ${status === "APPROVED"
-                                    ? "bg-green-500 text-white shadow"
-                                    : "bg-white hover:bg-green-50"
+                            className={`px-8 h-11 rounded-xl text-sm font-semibold transition-all cursor-pointer  ${status === "APPROVED"
+
+                                ? "bg-green-500 text-white shadow-md"
+                                : "bg-white text-green-600 border border-green-300 hover:bg-green-50"
                                 }`}
                         >
                             Approved
-                        </div>
+                        </button>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row gap-4 items-center justify-between">
 
+
+                    <div className="bg-white rounded-xl shadow-sm px-4 py-3 flex flex-col md:flex-row gap-4 items-center justify-between">
                         <div className="flex gap-2 items-center text-sm">
                             <input
                                 type="date"
@@ -117,21 +120,15 @@ const Data = () => {
                                 onChange={(e) => setEndDate(e.target.value)}
                                 className="border rounded-md px-2 py-1 text-sm text-black"
                             />
-                            <button
-                                onClick={fetchData}
-                                className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition cursor-pointer"
-                            >
-                                ค้นหา
-                            </button>
                         </div>
 
-                        <div className="flex gap-2">
+                        <div className="flex bg-gray-100 p-1 rounded-xl">
                             <button
                                 onClick={() => setChartType("bar")}
-                                className={`px-3 py-1.5 rounded-md text-sm transition cursor-pointer
-                  ${chartType === "bar"
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-white border hover:bg-gray-50"
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer
+      ${chartType === "bar"
+                                        ? "bg-white text-blue-600 shadow"
+                                        : "text-gray-500 hover:text-blue-600"
                                     }`}
                             >
                                 Bar
@@ -139,15 +136,16 @@ const Data = () => {
 
                             <button
                                 onClick={() => setChartType("line")}
-                                className={`px-3 py-1.5 rounded-md text-sm transition cursor-pointer
-                  ${chartType === "line"
-                                        ? "bg-blue-600 text-white"
-                                        : "bg-white border hover:bg-gray-50"
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition cursor-pointer
+      ${chartType === "line"
+                                        ? "bg-white text-blue-600 shadow"
+                                        : "text-gray-500 hover:text-blue-600"
                                     }`}
                             >
                                 Line
                             </button>
                         </div>
+
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow-sm">
