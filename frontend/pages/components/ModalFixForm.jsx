@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
-const ModalITForm = ({ onClose }) => {
+const ModalFixForm = ({ onClose }) => {
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({
         purpose: "",
         detail: "",
-        reason: "",
-        spec: "",
         requester: "",
         request_date: "",
         department: "",
@@ -23,25 +21,23 @@ const ModalITForm = ({ onClose }) => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            await axios.post("http://localhost:8000/ITForm", form);
+            await axios.post("http://localhost:8000/ITFixForm", form);
             alert("ส่งฟอร์มสำเร็จ");
             onClose();
         } catch (err) {
             console.error(err);
-            alert("บันทึกไม่สำเร็จ");
+            alert("ส่งไม่สำเร็จ");
         } finally {
             setSubmitting(false);
         }
     };
 
     const PURPOSE_OPTIONS = [
-        "ขอรหัส Wifi",
-        "ร้องขอ User",
-        "จัดซื้ออุปกรณ์ IT",
-        "ซ่อมแซมอุปกรณ์ IT",
-        "ขอสิทธิ์การใช้งานระบบ",
-        "ติดตั้งโปรแกรม",
-        "ปรับปรุงระบบ",
+        "Software",
+        "Software Mashine",
+        "HardWare",
+        "HardWare Mashine",
+        "Network",
         "อื่น ๆ",
 
     ];
@@ -68,7 +64,7 @@ const ModalITForm = ({ onClose }) => {
             >
                 <div className="bg-white w-[380px] sm:w-[520px] md:w-[500px] rounded-2xl shadow-xl">
                     <div className="p-5 border-b flex justify-between items-center">
-                        <h2 className="text-2xl font-semibold text-black">แบบฟอร์มร้องขอ IT</h2>
+                        <h2 className="text-2xl font-semibold text-black">แบบฟอร์มแจ้งซ่อม</h2>
                         <button onClick={onClose} className="text-2xl text-gray-500 cursor-pointer">✕</button>
                     </div>
                     <div className="p-6 space-y-5">
@@ -87,9 +83,7 @@ const ModalITForm = ({ onClose }) => {
                             ))}
                         </select>
                         {[
-                            ["รายละเอียดการร้องขอ", "detail"],
-                            ["เหตุผลหรือความจำเป็น", "reason"],
-                            ["มาตรฐานหรือ Spec ที่ต้องการ", "spec"],
+                            ["อารการเบื้องต้น", "detail"],
                         ].map(([label, name]) => (
                             <div key={name}>
                                 <label className="font-semibold text-black">{label}</label>
@@ -165,4 +159,4 @@ const ModalITForm = ({ onClose }) => {
     );
 };
 
-export default ModalITForm;
+export default ModalFixForm;

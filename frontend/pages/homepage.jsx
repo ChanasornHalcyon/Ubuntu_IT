@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import { motion } from "framer-motion";
 import ModalITForm from "./components/ModalITForm";
+import ModalFixForm from "./components/ModalFixForm";
 import { useRouter } from "next/router";
 const Homepage = () => {
   const router = useRouter();
   const [role, setRole] = useState("");
-  const [showModal, setShowModal] = useState(false);
-
+  const [showModalForm, setshowModalForm] = useState(false);
+  const [showModalFixForm, setshowModalFixForm] = useState(false);
   const openPending = () => {
     router.push("./Pending_Form")
   }
@@ -35,7 +36,7 @@ const Homepage = () => {
             whileHover={{ scale: 1.06, y: -2 }}
             whileTap={{ scale: 0.97 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            onClick={() => setShowModal(true)}
+            onClick={() => setshowModalForm(true)}
             className={cardClass}
           >
             <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
@@ -43,6 +44,17 @@ const Homepage = () => {
             </span>
           </motion.div>
 
+          <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className={cardClass}
+            onClick={() => setshowModalFixForm(true)}
+          >
+            <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
+              Fix_Form
+            </span>
+          </motion.div>
           <motion.div
             whileHover={{ scale: 1.06, y: -2 }}
             whileTap={{ scale: 0.97 }}
@@ -65,11 +77,13 @@ const Homepage = () => {
               Approve_Form
             </span>
           </motion.div>
+
         </div>
       </div>
 
 
-      {showModal && <ModalITForm onClose={() => setShowModal(false)} />}
+      {showModalForm && <ModalITForm onClose={() => setshowModalForm(false)} />}
+      {showModalFixForm && <ModalFixForm onClose={() => setshowModalFixForm(false)} />}
     </div>
   );
 };
