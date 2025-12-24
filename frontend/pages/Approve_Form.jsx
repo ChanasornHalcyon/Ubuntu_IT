@@ -46,6 +46,21 @@ const Approve_Form = () => {
             console.error(err);
         }
     };
+    const markProblem = async (id, problem_detail) => {
+        try {
+            const username = localStorage.getItem("username") || "";
+
+            await axios.post(`http://localhost:8000/markProblem/${id}`, {
+                problem_detail,
+                problem_by: username,
+            });
+
+            return { success: true };
+        } catch (err) {
+            console.error(err);
+            return { success: false };
+        }
+    };
 
     useEffect(() => {
         getData();
@@ -161,6 +176,8 @@ const Approve_Form = () => {
                 <ModalProblemForm
                     item={selectedProblemItem}
                     onClose={() => setShowProblemModal(false)}
+                    onSubmitProblem={markProblem}
+                    refreshData={getData}
                 />
             )}
         </div>

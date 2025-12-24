@@ -311,6 +311,28 @@ app.get("/ITDashboard", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+app.post("/markProblem/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { problem_detail, problem_by } = req.body;
+
+    await db.query(
+      `UPDATE it_requests
+       SET 
+         status = "PROBLEM",
+         problem_detail = ?,
+         problem_by = ?,
+         problem_at = NOW()
+       WHERE id = ?`,
+      [problem_detail, problem_by, id]
+    );
+
+    res.json({ success: true, message: "Updated to PROBLEM" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
 
 const PORT = 8000;
 app.listen(PORT, () =>

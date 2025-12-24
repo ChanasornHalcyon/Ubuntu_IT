@@ -1,8 +1,30 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
-const ModalProblemForm = ({ item, onClose }) => {
+const ModalProblemForm = ({ item, onClose, onSubmitProblem, refreshData }) => {
+    const [text, setText] = useState("");
+    const [loading, setLoading] = useState(false);
 
+    const handleSubmit = async () => {
+        if (!text.trim()) {
+            alert("กรุณากรอกปัญหา");
+            return;
+        }
+        setLoading(true);
+
+        const result = await onSubmitProblem(item.id, text);
+
+        setLoading(false);
+
+        if (result.success) {
+            alert("บันทึกปัญหาเรียบร้อย");
+            if (refreshData) refreshData();
+            onClose();
+        } else {
+            alert("บันทึกไม่สำเร็จ");
+        }
+    };
 
     return (
         <>
@@ -28,6 +50,7 @@ const ModalProblemForm = ({ item, onClose }) => {
                         </p>
 
                         <textarea
+                            onChange={(e) => setText(e.target.value)}
                             className="w-full p-3 border rounded-lg text-gray-800"
                             rows="4"
                             placeholder="กรุณาระบุปัญหา..."
@@ -42,7 +65,7 @@ const ModalProblemForm = ({ item, onClose }) => {
                             ยกเลิก
                         </button>
 
-                        <button
+                        <button onClick={handleSubmit}
                             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                         >
                             บันทึกปัญหา
