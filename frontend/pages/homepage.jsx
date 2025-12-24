@@ -22,6 +22,9 @@ const Homepage = () => {
   const openCompletepage = () => {
     router.push("./Complete_Form")
   }
+  const openProblempage = () => {
+    router.push("./Problem_Form")
+  }
   useEffect(() => {
     const userRole = localStorage.getItem("role");
     setRole(userRole || "");
@@ -92,7 +95,18 @@ const Homepage = () => {
             onClick={openCompletepage}
           >
             <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
-              ประวัติรายการ
+              ประวัติรายการที่สำเร็จ
+            </span>
+          </motion.div>
+          <motion.div
+            whileHover={{ scale: 1.06, y: -2 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className={cardClass}
+            onClick={openProblempage}
+          >
+            <span className="text-lg font-semibold text-[#0B4EA2] tracking-wide">
+              ประวัติรายการที่ติดปัญหา
             </span>
           </motion.div>
           <motion.div

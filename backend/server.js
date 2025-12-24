@@ -164,6 +164,21 @@ app.get("/getCompleteForm", async (req, res) => {
   }
 });
 
+app.get("/getProblemForm", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT *
+       FROM it_requests WHERE status ="PROBLEM"
+       ORDER BY request_date DESC`
+    );
+
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
 app.put("/updateStatus/:id", async (req, res) => {
   try {
     const id = req.params.id;
