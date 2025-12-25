@@ -19,14 +19,17 @@ const initMySQL = async () => {
 initMySQL();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "mail.halcyon.local",
+  port: 587,
+  secure: false, 
   auth: {
-    user: "chanasornhockey@gmail.com",
-    secure: false,
-    pass: "expa qkhh sfdl lxxo",
+    user: "itservice@halcyon.local",   
+    pass: "Itser@2026",            
+  },
+  tls: {
+    rejectUnauthorized: false, 
   },
 });
-
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
   const [rows] = await db.query(
