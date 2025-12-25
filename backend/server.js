@@ -70,34 +70,44 @@ app.post("/ITForm", async (req, res) => {
       ]
     );
 
-    const [users] = await db.query(
-      `SELECT email
-       FROM user
-       WHERE level >= 2
-         AND email IS NOT NULL`
-    );
+    const [approvers] = await db.query(`
+      SELECT department, email
+      FROM user
+      WHERE level >= 2
+        AND email IS NOT NULL
+    `);
 
-    const emailList = users.map((u) => u.email).join(",");
+    
+    const departmentMap = {};
+    
+    approvers.forEach((u) => {
+      if (!departmentMap[u.department]) {
+        departmentMap[u.department] = [];
+      }
+      departmentMap[u.department].push(u.email);
+    });
+
     const pendingUrl = "http://localhost:3000/Pending_Form";
 
-    await transporter.sendMail({
-      from: `"IT System" <chanasornhockey@gmail.com>`,
-      to: emailList,
-      subject: " มีคำขอ IT เพื่อรอการอนุมัติ",
-      html: `
-        <h3>มีคำขอ IT ใหม่</h3>
-        <p><b>ผู้ร้องขอ:</b> ${requester}</p>
-        <p><b>แผนก:</b> ${department}</p>
-        <p><b>วัตถุประสงค์:</b> ${purpose}</p>
-        <p><b>รายละเอียดการร้องขอ:</b> ${detail}</p>
-        <p><b>เหตุผลหรือความจำเป็น:</b> ${reason}</p>
-        <p><b>มาตรฐาน / Spec ที่ต้องการ:</b> ${spec}</p>
-        <p><b>วันที่ร้องขอ:</b> ${request_date}</p>
-        <hr />
-           <p>
-             กรุณาคลิกที่ปุ่มด้านล่างเพื่อพิจารณาอนุมัติ
-          </p>
+ 
+    for (const dept in departmentMap) {
+      const emailList = departmentMap[dept].join(",");
 
+      await transporter.sendMail({
+        from: `"IT System" <chanasornhockey@gmail.com>`,
+        to: emailList,
+        subject: `มีคำขอ IT ใหม่ (${department})`,
+        html: `
+          <h3>มีคำขอ IT ใหม่</h3>
+          <p><b>ผู้ร้องขอ:</b> ${requester}</p>
+          <p><b>แผนกผู้ร้องขอ:</b> ${department}</p>
+          <p><b>วัตถุประสงค์:</b> ${purpose}</p>
+          <p><b>รายละเอียด:</b> ${detail}</p>
+          <p><b>เหตุผล:</b> ${reason}</p>
+          <p><b>Spec:</b> ${spec}</p>
+          <p><b>วันที่ร้องขอ:</b> ${request_date}</p>
+          <hr />
+          <p>ส่งถึงผู้อนุมัติแผนก: <b>${dept}</b></p>
           <a href="${pendingUrl}"
              style="
                display:inline-block;
@@ -108,16 +118,19 @@ app.post("/ITForm", async (req, res) => {
                border-radius:6px;
                font-weight:600;
              ">
-            ไปที่หน้าForm
+            ไปที่หน้า Pending Form
           </a>
-      `,
-    });
+        `,
+      });
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error("ITForm Error:", err);
     res.status(500).json({ success: false });
   }
 });
+
 
 app.get("/getITForm", async (req, res) => {
   try {
