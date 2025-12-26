@@ -18,7 +18,10 @@ const transporter = nodemailer.createTransport({
   host: "mail.halcyon.local",
   port: 587,
   secure: false,
-  tls: { rejectUnauthorized: false },
+  auth: {
+    user: "itservice@halcyon.local",
+    pass: "Itser@2026",
+  },
 });
 
 app.post("/api/verifyUser", async (req, res) => {
