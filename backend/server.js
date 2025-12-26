@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-app.post("/verifyUser", async (req, res) => {
+app.post("/api/verifyUser", async (req, res) => {
   const { username, password } = req.body;
   const [rows] = await pool.query(
     "SELECT id, username, role, department FROM user WHERE username=? AND password=?",
