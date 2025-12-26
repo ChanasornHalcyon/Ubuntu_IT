@@ -22,6 +22,9 @@ const transporter = nodemailer.createTransport({
     user: "itservice@halcyon.local",
     pass: "Itser@2026",
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 app.post("/api/verifyUser", async (req, res) => {
