@@ -39,11 +39,16 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 w-full z-50 
-             bg-gradient-to-r from-[#FF1493]  to-[#7DDCFB]
-             backdrop-blur-md
-             p-5 flex justify-between items-center shadow-lg border-b border-white/20"
+        className="
+    fixed top-0 left-0 w-full z-50
+    bg-gradient-to-r from-[#ff4ecd] via-[#c77dff] to-[#4cc9f0]
+    backdrop-blur-xl
+    p-5 flex justify-between items-center
+    shadow-2xl
+    border-b border-white/40
+  "
       >
+
         <div onClick={goHomePage} className="flex items-center gap-2 cursor-pointer">
           <MdComputer className="text-3xl text-black" />
           <span className="hidden lg:flex text-xl font-semibold text-gray-800">

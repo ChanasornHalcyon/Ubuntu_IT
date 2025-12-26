@@ -83,11 +83,11 @@ app.post("/ITForm", async (req, res) => {
     
     const departmentMap = {};
     
-    approvers.forEach((u) => {
-      if (!departmentMap[u.department]) {
-        departmentMap[u.department] = [];
+    approvers.forEach((user) => {
+      if (!departmentMap[user.department]) {
+        departmentMap[user.department] = [];
       }
-      departmentMap[u.department].push(u.email);
+      departmentMap[user.department].push(user.email);
     });
 
     const pendingUrl = "http://localhost:3000/Pending_Form";
