@@ -28,7 +28,7 @@ const ModalITForm = ({ onClose }) => {
             onClose();
         } catch (err) {
             console.error(err);
-            alert("บันทึกไม่สำเร็จ");
+            alert("ส่งไม่สำเร็จ");
         } finally {
             setSubmitting(false);
         }
