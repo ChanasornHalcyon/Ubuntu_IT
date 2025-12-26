@@ -41,7 +41,7 @@ app.post("/api/verifyUser", async (req, res) => {
   }
 });
 
-app.post("/ITForm", async (req, res) => {
+app.post("/api/ITForm", async (req, res) => {
   try {
     const {
       purpose,
@@ -129,7 +129,7 @@ app.post("/ITForm", async (req, res) => {
   }
 });
 
-app.get("/getITForm", async (req, res) => {
+app.get("/api/getITForm", async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT *
@@ -144,7 +144,7 @@ app.get("/getITForm", async (req, res) => {
   }
 });
 
-app.get("/getApproveForm", async (req, res) => {
+app.get("/api/getApproveForm", async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT *
@@ -159,7 +159,7 @@ app.get("/getApproveForm", async (req, res) => {
   }
 });
 
-app.get("/getCompleteForm", async (req, res) => {
+app.get("/api/getCompleteForm", async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT *
@@ -174,7 +174,7 @@ app.get("/getCompleteForm", async (req, res) => {
   }
 });
 
-app.get("/getProblemForm", async (req, res) => {
+app.get("/api/getProblemForm", async (req, res) => {
   try {
     const [rows] = await pool.query(
       `SELECT *
@@ -189,7 +189,7 @@ app.get("/getProblemForm", async (req, res) => {
   }
 });
 
-app.put("/updateStatus/:id", async (req, res) => {
+app.put("/api/updateStatus/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const { status, username } = req.body;
@@ -208,7 +208,7 @@ app.put("/updateStatus/:id", async (req, res) => {
   }
 });
 
-app.post("/ITApproveForm", async (req, res) => {
+app.post("/api/ITApproveForm", async (req, res) => {
   try {
     const { id } = req.body;
 
@@ -226,7 +226,7 @@ app.post("/ITApproveForm", async (req, res) => {
   }
 });
 
-app.post("/ITFixForm", async (req, res) => {
+app.post("/api/ITFixForm", async (req, res) => {
   try {
     const {
       purpose,
@@ -300,7 +300,7 @@ app.post("/ITFixForm", async (req, res) => {
   }
 });
 
-app.get("/ITDashboard", async (req, res) => {
+app.get("/api/ITDashboard", async (req, res) => {
   try {
     let { status, startDate, endDate } = req.query;
 
@@ -336,7 +336,7 @@ app.get("/ITDashboard", async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
-app.post("/markProblem/:id", async (req, res) => {
+app.post("/api/markProblem/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const { problem_detail, problem_by } = req.body;
