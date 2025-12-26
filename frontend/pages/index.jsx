@@ -12,10 +12,10 @@ const Index = () => {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = axios.post("http://192.168.23.14/api/verifyUser", {
-  username,
-  password,
-});
+      const res = await axios.post("/api/verifyUser", {
+        username,
+        password,
+      });
 
       if (res.data.success) {
         localStorage.setItem("userId", res.data.user.id);
