@@ -47,7 +47,7 @@ const ModalFixForm = ({ onClose }) => {
     const handleSubmit = async () => {
         try {
             setSubmitting(true);
-            await axios.post("http://localhost:8000/ITFixForm", {
+            await axios.post("/api/ITFixForm", {
                 ...form,
                 tools: form.tools.join(", "),
             });

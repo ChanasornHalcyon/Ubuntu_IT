@@ -12,7 +12,7 @@ const Index = () => {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/verifyUser", {
+      const res = await axios.post("/api/verifyUser", {
         username,
         password,
       });

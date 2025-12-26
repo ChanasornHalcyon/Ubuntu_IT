@@ -8,7 +8,7 @@ const Problem_Form = () => {
 
     const getData = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/getProblemForm");
+            const res = await axios.get("/api/getProblemForm");
             if (res.data.success) {
                 setData(res.data.data);
             }

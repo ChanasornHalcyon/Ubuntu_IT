@@ -16,7 +16,7 @@ const Approve_Form = () => {
         setShowModal(true);
     };
 
-    
+
     const openProblemModal = (item) => {
         setSelectedProblemItem(item);
         setShowProblemModal(true);
@@ -24,7 +24,7 @@ const Approve_Form = () => {
 
     const getData = async () => {
         try {
-            const res = await axios.get("http://localhost:8000/getApproveForm");
+            const res = await axios.get("/api/getApproveForm");
             if (res.data.success) {
                 setData(res.data.data);
             }
@@ -37,7 +37,7 @@ const Approve_Form = () => {
 
     const updateStatus = async (id, newStatus, username) => {
         try {
-            await axios.put(`http://localhost:8000/updateStatus/${id}`, {
+            await axios.put(`/api/updateStatus/${id}`, {
                 status: newStatus,
                 username: username,
             });
@@ -51,7 +51,7 @@ const Approve_Form = () => {
         try {
             const username = localStorage.getItem("username") || "";
 
-            await axios.post(`http://localhost:8000/markProblem/${id}`, {
+            await axios.post(`/api/markProblem/${id}`, {
                 problem_detail,
                 problem_by: username,
             });

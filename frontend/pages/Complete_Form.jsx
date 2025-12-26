@@ -8,7 +8,7 @@ const Complete_Form = () => {
 
   const getData = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/getCompleteForm");
+      const res = await axios.get("/api/getCompleteForm");
       if (res.data.success) {
         setData(res.data.data);
       }
