@@ -18,7 +18,10 @@ const transporter = nodemailer.createTransport({
   host: "mail.halcyon.local",
   port: 587,
   secure: false,
-  tls: { rejectUnauthorized: false },
+  auth: {
+    user: "itservice@halcyon.local",
+    pass: "Itser@2026",
+  },
 });
 
 app.post("/api/verifyUser", async (req, res) => {
@@ -86,7 +89,7 @@ app.post("/api/ITForm", async (req, res) => {
       const emailList = departmentMap[dept].join(",");
 
       await transporter.sendMail({
-        from: `"IT System" <chanasornhockey@gmail.com>`,
+        from: '"IT System" <itservice@company.com>',
         to: emailList,
         subject: `มีคำขอ IT ใหม่ (${department})`,
         html: `
