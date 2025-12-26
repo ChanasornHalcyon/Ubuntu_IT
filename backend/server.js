@@ -26,6 +26,7 @@ const transporter = nodemailer.createTransport({
     rejectUnauthorized: false,
   },
 });
+
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
   const [rows] = await pool.query(
@@ -359,6 +360,7 @@ app.post("/markProblem/:id", async (req, res) => {
 });
 
 const PORT = 8000;
+
 app.listen(PORT, () =>
   console.log(`🚀 Server running at http://localhost:${PORT}`)
 );
