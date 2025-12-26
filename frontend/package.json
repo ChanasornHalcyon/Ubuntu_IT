@@ -2,11 +2,11 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
+ "scripts": {
+  "dev": "next dev -p 3001",
+  "build": "next build",
+  "start": "next start -p 3001"
+},
   "dependencies": {
     "animate.css": "^4.1.1",
     "axios": "^1.13.2",
