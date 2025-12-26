@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
+import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
-import ModalITForm from "./components/ModalITForm";
-import ModalFixForm from "./components/ModalFixForm";
+import ModalITForm from "../components/ModalITForm";
+import ModalFixForm from "../components/ModalFixForm";
 import { useRouter } from "next/router";
 const Homepage = () => {
   const router = useRouter();
