@@ -7,32 +7,29 @@ const app = express();
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-let db;
-const initMySQL = async () => {
-  db = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "khemnak1530",
-    database: "halcyon_it",
-  });
-};
-initMySQL();
+const pool = mysql.createPool({
+  host: "localhost",
+  user: "root",
+  password: "khemnak1530",
+  database: "halcyon_it",
+});
 
 const transporter = nodemailer.createTransport({
   host: "mail.halcyon.local",
   port: 587,
-  secure: false, 
+  secure: false,
   auth: {
-    user: "itservice@halcyon.local",   
-    pass: "Itser@2026",            
+    user: "itservice@halcyon.local",
+    pass: "Itser@2026",
   },
   tls: {
-    rejectUnauthorized: false, 
+    rejectUnauthorized: false,
   },
 });
+
 app.post("/verifyUser", async (req, res) => {
   const { username, password } = req.body;
-  const [rows] = await db.query(
+  const [rows] = await pool.query(
     "SELECT id, username, role, department FROM user WHERE username=? AND password=?",
     [username, password]
   );
@@ -57,7 +54,7 @@ app.post("/ITForm", async (req, res) => {
       required_date,
     } = req.body;
 
-    await db.query(
+    await pool.query(
       `INSERT INTO it_requests
        (purpose, detail, reason, spec, requester, department, request_date, required_date, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
@@ -73,16 +70,15 @@ app.post("/ITForm", async (req, res) => {
       ]
     );
 
-    const [approvers] = await db.query(`
+    const [approvers] = await pool.query(`
       SELECT department, email
       FROM user
       WHERE level >= 2
         AND email IS NOT NULL
     `);
 
-    
     const departmentMap = {};
-    
+
     approvers.forEach((user) => {
       if (!departmentMap[user.department]) {
         departmentMap[user.department] = [];
@@ -92,7 +88,6 @@ app.post("/ITForm", async (req, res) => {
 
     const pendingUrl = "http://localhost:3000/Pending_Form";
 
- 
     for (const dept in departmentMap) {
       const emailList = departmentMap[dept].join(",");
 
@@ -134,10 +129,9 @@ app.post("/ITForm", async (req, res) => {
   }
 });
 
-
 app.get("/getITForm", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
       `SELECT *
        FROM it_requests
         ORDER BY created_at DESC`
@@ -152,7 +146,7 @@ app.get("/getITForm", async (req, res) => {
 
 app.get("/getApproveForm", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
       `SELECT *
        FROM it_requests WHERE status ="APPROVED"
        ORDER BY request_date DESC`
@@ -167,7 +161,7 @@ app.get("/getApproveForm", async (req, res) => {
 
 app.get("/getCompleteForm", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
       `SELECT *
        FROM it_requests WHERE status ="COMPLETE"
        ORDER BY request_date DESC`
@@ -182,7 +176,7 @@ app.get("/getCompleteForm", async (req, res) => {
 
 app.get("/getProblemForm", async (req, res) => {
   try {
-    const [rows] = await db.query(
+    const [rows] = await pool.query(
       `SELECT *
        FROM it_requests WHERE status ="PROBLEM"
        ORDER BY request_date DESC`
@@ -200,7 +194,7 @@ app.put("/updateStatus/:id", async (req, res) => {
     const id = req.params.id;
     const { status, username } = req.body;
 
-    await db.query(
+    await pool.query(
       `UPDATE it_requests 
        SET status = ?, completed_by = ?, completed_at = NOW()
        WHERE id = ?`,
@@ -218,7 +212,7 @@ app.post("/ITApproveForm", async (req, res) => {
   try {
     const { id } = req.body;
 
-    await db.query(
+    await pool.query(
       `UPDATE it_requests
        SET status = 'APPROVED'
        WHERE id = ?`,
@@ -244,7 +238,7 @@ app.post("/ITFixForm", async (req, res) => {
       required_date,
     } = req.body;
 
-    await db.query(
+    await pool.query(
       `INSERT INTO it_fixrequest
    (purpose, detail,tools, requester, department, request_date, required_date)
     VALUES (?, ?, ?, ?,?, ?, ?)`,
@@ -259,7 +253,7 @@ app.post("/ITFixForm", async (req, res) => {
       ]
     );
 
-    const [users] = await db.query(
+    const [users] = await pool.query(
       `SELECT email
        FROM user
        WHERE level >= 2
@@ -334,7 +328,7 @@ app.get("/ITDashboard", async (req, res) => {
       ORDER BY DATE(${dateField})
     `;
 
-    const [rows] = await db.query(sql, params);
+    const [rows] = await pool.query(sql, params);
 
     res.json({ success: true, data: rows });
   } catch (err) {
@@ -347,7 +341,7 @@ app.post("/markProblem/:id", async (req, res) => {
     const id = req.params.id;
     const { problem_detail, problem_by } = req.body;
 
-    await db.query(
+    await pool.query(
       `UPDATE it_requests
        SET 
          status = "PROBLEM",
