@@ -2,7 +2,6 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const ModalCompleteForm = ({ item, onClose, onConfirm }) => {
-    if (!item) return null;
 
     return (
         <>
